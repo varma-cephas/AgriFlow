@@ -18,6 +18,10 @@
                 <div class="ms-auto d-flex align-items-center gap-3 text-white small">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
+                        @if (User.IsInRole("Farmer") || User.IsInRole("Agent") || User.IsInRole("Admin"))
+                        {
+                            <a asp-page="/SeedStock/Index" class="link-light">Seed stock</a>
+                        }
                         <span>@User.Identity.Name</span>
                         <form method="post" asp-page="/Account/Logout" class="m-0">
                             <button type="submit" class="btn btn-outline-light btn-sm">Sign out</button>
@@ -34,9 +38,19 @@
         </main>
     </div>
 
+    <partial name="_ToastPartial" />
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const toastElement = document.getElementById('appToast');
+            if (toastElement && window.bootstrap) {
+                window.bootstrap.Toast.getOrCreateInstance(toastElement, { autohide: true, delay: 5000 }).show();
+            }
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

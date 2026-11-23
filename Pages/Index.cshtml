@@ -24,4 +24,30 @@
             </p>
         </div>
     </div>
+
+    <section class="card border-0 shadow-sm mt-4" aria-labelledby="lowStockTitle">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h2 class="h5 fw-bold mb-1" id="lowStockTitle">Low-stock items</h2>
+                    @if (Model.LowStockCount.HasValue)
+                    {
+                        <p class="text-muted small mb-0">Inventory items with quantity less than or equal to 10 in your authorized scope.</p>
+                    }
+                </div>
+                @if (Model.LowStockCount.HasValue)
+                {
+                    <span class="badge bg-danger fs-5">@Model.LowStockCount.Value</span>
+                }
+            </div>
+            @if (Model.LowStockCount.HasValue)
+            {
+                <a asp-page="/SeedStock/Index" class="btn btn-outline-success btn-sm mt-3">View seed stock</a>
+            }
+            else
+            {
+                <p class="text-muted small mt-2 mb-0">@Model.SummaryMessage</p>
+            }
+        </div>
+    </section>
 </div>
