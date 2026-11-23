@@ -8,16 +8,19 @@ namespace AgriFlow.Pages.SeedStock;
 public class IndexModel : PageModel
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger<IndexModel> _logger;
 
-    public IndexModel(IConfiguration configuration)
+    public IndexModel(IConfiguration configuration, ILogger<IndexModel> logger)
     {
         _configuration = configuration;
+        _logger = logger;
     }
 
     public IReadOnlyList<SeedStockRow> StockRows { get; private set; } = [];
     public string ActiveFarmerName { get; private set; } = string.Empty;
     public string StatusMessage { get; private set; } = string.Empty;
     public bool IsAgent { get; private set; }
+    public bool CanDelete { get; private set; }
     public int? ActiveFarmerId { get; private set; }
     public IReadOnlyList<FarmerOption> AssignedFarmers { get; private set; } = [];
 
@@ -32,6 +35,9 @@ public class IndexModel : PageModel
         }
 
         IsAgent = role.Equals("Agent", StringComparison.OrdinalIgnoreCase);
+        CanDelete = IsAgent
+            || role.Equals("Farmer", StringComparison.OrdinalIgnoreCase)
+            || role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
         if (farmerId.HasValue && (IsAgent || role.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
         {
             HttpContext.Session.SetString(SeedStockContext.ActiveFarmerKey, farmerId.Value.ToString());
@@ -98,6 +104,156 @@ WHERE u.Id = @FarmerId";
         }
 
         return Page();
+    }
+
+    public IActionResult OnPostDelete(int id)
+    {
+        var role = SeedStockContext.GetRole(User);
+        var actorId = SeedStockContext.GetActorUserId(User);
+        var activeFarmerId = SeedStockContext.GetActiveFarmerId(HttpContext, User);
+        var isFarmer = role.Equals("Farmer", StringComparison.OrdinalIgnoreCase);
+        var isAgent = role.Equals("Agent", StringComparison.OrdinalIgnoreCase);
+        var isAdmin = role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+
+        if (id <= 0 || !actorId.HasValue || (!isFarmer && !isAgent && !isAdmin))
+            return RedirectToPage("./Index", new { status = "You are not authorized to delete this seed stock." });
+
+        if (isFarmer)
+            activeFarmerId = SeedStockContext.GetFarmerId(User);
+        if ((isFarmer || isAgent) && !activeFarmerId.HasValue)
+            return RedirectToPage("./Index", new { status = "You are not authorized to delete this seed stock." });
+
+        SqlConnection? connection = null;
+        SqlTransaction? transaction = null;
+        var farmerId = 0;
+        var deleteInProgress = false;
+        try
+        {
+            connection = new SqlConnection(_configuration.GetConnectionString("AgriFlowDb"));
+            connection.Open();
+            transaction = connection.BeginTransaction(IsolationLevel.Serializable);
+
+            using (var stock = connection.CreateCommand())
+            {
+                stock.Transaction = transaction;
+                stock.CommandText = @"
+SELECT ss.FarmerId, c.Name, ss.Variety
+FROM seed_stock ss WITH (UPDLOCK, HOLDLOCK)
+INNER JOIN crop c ON c.Id = ss.CropId
+WHERE ss.Id = @Id";
+                stock.Parameters.AddWithValue("@Id", id);
+                using var reader = stock.ExecuteReader();
+                if (!reader.Read())
+                {
+                    reader.Close();
+                    transaction.Rollback();
+                    return RedirectToPage("./Index", new { status = "This seed stock was not found or is outside your authorized scope." });
+                }
+
+                farmerId = reader.GetInt32(0);
+                var cropName = reader.GetString(1);
+                var variety = reader.GetString(2);
+                reader.Close();
+
+                if ((isFarmer && activeFarmerId != farmerId)
+                    || (isAgent && (activeFarmerId != farmerId || !IsAssignedAgent(connection, transaction, actorId.Value, farmerId)))
+                    || (isAdmin && activeFarmerId.HasValue && activeFarmerId != farmerId))
+                {
+                    transaction.Rollback();
+                    return RedirectToPage("./Index", new { status = "This seed stock was not found or is outside your authorized scope." });
+                }
+
+                using var delete = connection.CreateCommand();
+                delete.Transaction = transaction;
+                delete.CommandText = "DELETE FROM seed_stock WHERE Id = @Id AND FarmerId = @FarmerId";
+                delete.Parameters.AddWithValue("@Id", id);
+                delete.Parameters.AddWithValue("@FarmerId", farmerId);
+                deleteInProgress = true;
+                var deletedRows = delete.ExecuteNonQuery();
+                deleteInProgress = false;
+                if (deletedRows != 1)
+                {
+                    transaction.Rollback();
+                    return RedirectToPage("./Index", new { status = "This seed stock was not found or is outside your authorized scope." });
+                }
+
+                WriteDeleteAudit(connection, transaction, actorId.Value, farmerId, id, role, cropName, variety);
+            }
+
+            transaction.Commit();
+            return RedirectToPage("./Index", new { status = "Seed stock deleted successfully." });
+        }
+        catch (SqlException exception) when (exception.Number == 547 && deleteInProgress)
+        {
+            RollbackSafely(transaction, id);
+            try
+            {
+                using var countCommand = connection!.CreateCommand();
+                countCommand.CommandText = "SELECT COUNT(*) FROM planting_batch WHERE SeedStockId = @Id";
+                countCommand.Parameters.AddWithValue("@Id", id);
+                var batchCount = Convert.ToInt32(countCommand.ExecuteScalar());
+                if (batchCount > 0)
+                    return RedirectToPage("./Index", new { status = $"This seed stock is used by {batchCount} planting batch(es) and can't be deleted." });
+
+                _logger.LogError(exception, "Seed stock deletion failed due to a foreign key constraint for stock {SeedStockId}.", id);
+            }
+            catch (Exception countException)
+            {
+                _logger.LogError(countException, "Could not count planting batches after seed stock deletion was blocked for stock {SeedStockId}.", id);
+            }
+
+            return RedirectToPage("./Index", new { status = "The seed stock could not be deleted. Please try again." });
+        }
+        catch (Exception exception)
+        {
+            RollbackSafely(transaction, id);
+            _logger.LogError(exception, "An unexpected error occurred while deleting seed stock {SeedStockId}.", id);
+            return RedirectToPage("./Index", new { status = "The seed stock could not be deleted. Please try again." });
+        }
+        finally
+        {
+            transaction?.Dispose();
+            connection?.Dispose();
+        }
+    }
+
+    private static bool IsAssignedAgent(SqlConnection connection, SqlTransaction transaction, int agentId, int farmerId)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = "SELECT COUNT(1) FROM agent_farmer_assignment WITH (HOLDLOCK) WHERE AgentId = @AgentId AND FarmerId = @FarmerId";
+        command.Parameters.AddWithValue("@AgentId", agentId);
+        command.Parameters.AddWithValue("@FarmerId", farmerId);
+        return Convert.ToInt32(command.ExecuteScalar()) > 0;
+    }
+
+    private void WriteDeleteAudit(SqlConnection connection, SqlTransaction transaction, int actorId, int farmerId, int entityId, string role, string cropName, string variety)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = @"
+INSERT INTO audit_log (At, ActorUserId, OnBehalfOfFarmerId, Entity, EntityId, Action, Summary, Result)
+VALUES (SYSUTCDATETIME(), @ActorUserId, @FarmerId, 'SeedStock', @EntityId, 'Delete', @Summary, 'Success')";
+        command.Parameters.AddWithValue("@ActorUserId", actorId);
+        command.Parameters.AddWithValue("@FarmerId", farmerId);
+        command.Parameters.AddWithValue("@EntityId", entityId.ToString());
+        command.Parameters.AddWithValue("@Summary", $"Deleted {cropName} seed stock ({variety}). Actor role: {role}.");
+        command.ExecuteNonQuery();
+    }
+
+    private void RollbackSafely(SqlTransaction? transaction, int seedStockId)
+    {
+        if (transaction is null)
+            return;
+
+        try
+        {
+            transaction.Rollback();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Could not roll back the seed stock deletion transaction for stock {SeedStockId}.", seedStockId);
+        }
     }
 
     private void LoadRows(SqlConnection connection, int? farmerId)
