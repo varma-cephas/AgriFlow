@@ -1,45 +1,13 @@
 ﻿@page
 @model AgriFlow.Pages.Farmer.DashboardModel
-@{
-    ViewData["Title"] = "Farm Workspace";
-}
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-1">Farm Workspace</h3>
-        <p class="text-muted small mb-0">Welcome back, @User.Identity?.Name. Manage your seeds, plantings, and harvests.</p>
+@{ Layout = "_FarmerLayout"; ViewData["Title"] = "Overview"; }
+<div class="farmer-page">
+    <div class="farmer-heading"><div><div class="farmer-eyebrow">FARMER WORKSPACE</div><h1>Farm overview</h1><p>Welcome back, @User.Identity?.Name. Manage your seeds, plantings, harvests, and buyer orders.</p></div><a asp-page="/Farmer/EditFarmer" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i> Edit farm details</a></div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><a class="farmer-stat-link" asp-page="/Farmer/SeedStock"><div class="farmer-stat"><span>Seed stock</span><strong>@Model.Overview.TotalSeedStock.ToString("0.##") kg</strong><small>@Model.Overview.SeedItems item(s) available</small></div></a></div>
+        <div class="col-md-3"><a class="farmer-stat-link" asp-page="/Farmer/Planting"><div class="farmer-stat"><span>Active plantings</span><strong>@Model.Overview.ActiveBatches</strong><small>Monitor growing batches</small></div></a></div>
+        <div class="col-md-3"><a class="farmer-stat-link" asp-page="/Farmer/Planting"><div class="farmer-stat"><span>Harvests due</span><strong>@Model.Overview.UpcomingHarvests</strong><small>Within the next 30 days</small></div></a></div>
+        <div class="col-md-3"><a class="farmer-stat-link" asp-page="/Farmer/Orders"><div class="farmer-stat"><span>Buyer orders</span><strong>@Model.Overview.OpenOrders</strong><small>Orders requiring action</small></div></a></div>
     </div>
-    <a asp-page="/Farmer/EditProfile" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-pencil me-1"></i> Edit farm details
-    </a>
-</div>
-
-<div class="row g-3">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Seed Stock</div>
-                <h4 class="fw-bold mb-1">0 items</h4>
-                <p class="text-muted small mb-0">Track available seeds and low-stock alerts.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Active Plantings</div>
-                <h4 class="fw-bold mb-1">0 batches</h4>
-                <p class="text-muted small mb-0">Monitor crop maturity and predicted harvest dates.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Buyer Orders</div>
-                <h4 class="fw-bold mb-1">0 orders</h4>
-                <p class="text-muted small mb-0">Confirm reservations and dispatch harvested produce.</p>
-            </div>
-        </div>
-    </div>
+    <div class="row g-4"><div class="col-lg-7"><div class="farmer-card"><div class="farmer-card-header"><div><h3>Manage your farm</h3><span>Complete your daily production tasks.</span></div></div><div class="row g-3"><div class="col-sm-6"><a asp-page="/Farmer/SeedStock" class="farmer-action"><i class="bi bi-box-seam"></i><span><strong>Manage seed stock</strong><small>Add or review available seed.</small></span><i class="bi bi-chevron-right"></i></a></div><div class="col-sm-6"><a asp-page="/Farmer/Planting" class="farmer-action"><i class="bi bi-flower1"></i><span><strong>Record planting</strong><small>Use stock to create a batch.</small></span><i class="bi bi-chevron-right"></i></a></div><div class="col-sm-6"><a asp-page="/Farmer/Listings" class="farmer-action"><i class="bi bi-tag"></i><span><strong>List harvest</strong><small>Make produce available to buyers.</small></span><i class="bi bi-chevron-right"></i></a></div><div class="col-sm-6"><a asp-page="/Farmer/Orders" class="farmer-action"><i class="bi bi-truck"></i><span><strong>Dispatch orders</strong><small>Confirm and dispatch sales.</small></span><i class="bi bi-chevron-right"></i></a></div></div></div></div><div class="col-lg-5"><div class="farmer-card h-100"><div class="farmer-card-header"><div><h3>Getting started</h3><span>Follow these steps to use AgriFlow.</span></div></div><ol class="farmer-steps"><li>Add your seed stock.</li><li>Record planting when seeds are used.</li><li>List your expected or harvested produce.</li><li>Review buyer orders and dispatch them.</li></ol></div></div></div>
 </div>

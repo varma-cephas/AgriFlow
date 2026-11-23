@@ -57,7 +57,14 @@ public class LoginModel : PageModel
             new ClaimsPrincipal(identity),
             new AuthenticationProperties { IsPersistent = Input.RememberMe });
 
-        return RedirectToPage("/Index");
+        return result.Role switch
+        {
+            "Agent" => RedirectToPage("/Agent/Dashboard"),
+            "Farmer" => RedirectToPage("/Farmer/Dashboard"),
+            "Buyer" => RedirectToPage("/Buyer/Dashboard"),
+            "Admin" => RedirectToPage("/Admin/Dashboard"),
+            _ => RedirectToPage("/Index")
+        };
     }
 
     public IActionResult OnPostForgotPassword()

@@ -15,4 +15,14 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.2" />
   </ItemGroup>
 
+  <!-- The repository contains an old nested copy of the project under
+       AgriFlow\AgriFlow. Exclude it to prevent duplicate C# and Razor types. -->
+  <ItemGroup>
+    <Compile Remove="AgriFlow\**" />
+    <EmbeddedResource Remove="AgriFlow\**" />
+    <Content Remove="AgriFlow\**" />
+    <None Remove="AgriFlow\**" />
+    <RazorGenerate Remove="AgriFlow\**" />
+  </ItemGroup>
+
 </Project>

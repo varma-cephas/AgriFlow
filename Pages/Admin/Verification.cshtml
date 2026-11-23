@@ -1,0 +1,18 @@
+@page
+@model AgriFlow.Pages.Admin.VerificationModel
+@{ Layout = "_AdminLayout"; ViewData["Title"] = "Verification"; ViewData["Section"] = "Verification"; }
+<div class="admin-page">
+    <div class="admin-heading"><div><div class="admin-eyebrow">COMPLIANCE CENTER</div><h1>Verification</h1><p>Review and approve farmers and businesses waiting for access.</p></div></div>
+    <div class="admin-card mb-4"><div class="admin-card-header"><div><h3>Pending farmers</h3><span>@Model.Farmers.Count registration(s) waiting for review</span></div></div>
+        @if (Model.Farmers.Count == 0) { <div class="admin-empty"><i class="bi bi-check-circle"></i><h5>No pending farmers</h5><p>All farmer registrations have been reviewed.</p></div> }
+        else { <div class="table-responsive"><table class="table admin-table"><thead><tr><th>Applicant</th><th>Farm</th><th>Location</th><th>Contact</th><th>Submitted</th><th></th></tr></thead><tbody>
+        @foreach (var item in Model.Farmers) { <tr><td><strong>@item.Name</strong><small>@item.LandUpi</small></td><td>@item.FarmName</td><td>@item.District</td><td><small>@item.Email<br />@item.Phone</small></td><td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><form method="post" asp-page-handler="Farmer" class="d-inline"><input type="hidden" name="RecordId" value="@item.Id" /><button name="decision" value="approve" class="btn btn-sm btn-success">Approve</button><button name="decision" value="reject" class="btn btn-sm btn-outline-danger ms-1">Reject</button></form></td></tr> }
+        </tbody></table></div> }
+    </div>
+    <div class="admin-card"><div class="admin-card-header"><div><h3>Pending businesses</h3><span>@Model.Businesses.Count registration(s) waiting for review</span></div></div>
+        @if (Model.Businesses.Count == 0) { <div class="admin-empty"><i class="bi bi-check-circle"></i><h5>No pending businesses</h5><p>All business registrations have been reviewed.</p></div> }
+        else { <div class="table-responsive"><table class="table admin-table"><thead><tr><th>Business</th><th>Contact</th><th>RDB code</th><th>City</th><th>Submitted</th><th></th></tr></thead><tbody>
+        @foreach (var item in Model.Businesses) { <tr><td><strong>@item.Name</strong></td><td>@item.ContactName<small>@item.Email</small></td><td>@item.RdbCode</td><td>@item.City</td><td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</td><td class="text-end"><form method="post" asp-page-handler="Business" class="d-inline"><input type="hidden" name="RecordId" value="@item.Id" /><button name="decision" value="approve" class="btn btn-sm btn-success">Approve</button><button name="decision" value="reject" class="btn btn-sm btn-outline-danger ms-1">Reject</button></form></td></tr> }
+        </tbody></table></div> }
+    </div>
+</div>

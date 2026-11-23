@@ -1,0 +1,23 @@
+@page
+@model AgriFlow.Pages.Agent.MyFarmersModel
+@{
+    Layout = "_AgentLayout";
+    ViewData["Title"] = "My Farmers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4"><div><div class="agent-eyebrow text-success">AGENT WORKSPACE</div><h2 class="fw-bold mb-1">My farmers</h2><p class="text-muted mb-0">Farmers assigned to your field support area.</p></div><a asp-page="/Account/RegisterFarmer" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Register farmer</a></div>
+<div class="agent-card">
+    @if (Model.Farmers.Count == 0)
+    {
+        <div class="agent-empty"><i class="bi bi-people fs-2"></i><p class="fw-semibold mb-1">No farmers assigned yet</p><p class="small mb-0">Registered farmers will appear here after assignment.</p></div>
+    }
+    else
+    {
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Farmer</th><th>Farm / Area</th><th>Phone</th><th>Active batches</th><th>Seed stock</th><th>Status</th></tr></thead><tbody>
+        @foreach (var farmer in Model.Farmers)
+        {
+            <tr><td><strong>@farmer.FullName</strong></td><td>@farmer.FarmName<br /><small class="text-muted">@farmer.District</small></td><td>@farmer.Phone</td><td>@farmer.ActiveBatches</td><td>@farmer.SeedStock.ToString("0.##") kg</td><td><span class="agent-pill">@farmer.VerificationStatus</span></td></tr>
+        }
+        </tbody></table></div>
+    }
+</div>

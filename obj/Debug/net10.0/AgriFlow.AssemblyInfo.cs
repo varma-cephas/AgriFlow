@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AgriFlow")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25f2275386aff1a7afbdcea51a7bddd614c425cb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d80d8893196a297c34e9d0fa8f40829a8b0c7ff2")]
 [assembly: System.Reflection.AssemblyProductAttribute("AgriFlow")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AgriFlow")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

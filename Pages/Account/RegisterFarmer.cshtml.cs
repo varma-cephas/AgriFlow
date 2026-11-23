@@ -23,6 +23,19 @@ public class RegisterFarmerModel : PageModel
     {
         if (!ModelState.IsValid) return Page();
 
+        if (User.IsInRole("Agent"))
+        {
+            var agentId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var agentResult = await _authRepo.RegisterFarmerByAgentAsync(Input, agentId);
+            if (!agentResult.Success)
+            {
+                ModelState.AddModelError(agentResult.ErrorField ?? string.Empty, agentResult.ErrorMessage!);
+                return Page();
+            }
+
+            return RedirectToPage("/Agent/Dashboard");
+        }
+
         var result = await _authRepo.RegisterFarmerAsync(Input);
         if (!result.Success)
         {

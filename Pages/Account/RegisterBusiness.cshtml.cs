@@ -1,8 +1,5 @@
-using System.Security.Claims;
 using AgriFlow.Data;
 using AgriFlow.Models.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -30,19 +27,7 @@ public class RegisterBusinessModel : PageModel
             return Page();
         }
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, result.UserId.ToString()),
-            new(ClaimTypes.Name, result.FullName),
-            new(ClaimTypes.Role, result.Role),
-            new("BuyerBusinessId", result.BuyerBusinessId!.Value.ToString())
-        };
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity),
-            new AuthenticationProperties { IsPersistent = true });
-
-        return RedirectToPage("/Account/PendingBusiness");
+        TempData["SuccessMessage"] = "Your business account was submitted for verification. You can sign in after an administrator approves it.";
+        return RedirectToPage("/Account/Login");
     }
 }

@@ -8,6 +8,10 @@ builder.Services.AddDataProtection();
 builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddSingleton<NationalIdProtector>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<AgentRepository>();
+builder.Services.AddScoped<AdminRepository>();
+builder.Services.AddScoped<FarmerRepository>();
+builder.Services.AddScoped<BuyerRepository>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

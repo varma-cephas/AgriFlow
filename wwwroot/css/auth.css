@@ -88,6 +88,31 @@ body {
     max-width: 620px;
 }
 
+/* Farmer registration inside the Agent Workspace */
+.agent-content .agent-form-page {
+    width: calc(100% - 96px);
+    max-width: 1050px;
+    margin: 2rem 48px 3rem;
+    padding: 2rem 2.25rem;
+    border: 1px solid #e3ebe6;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 22px rgba(20, 55, 35, 0.06);
+}
+
+.agent-content .agent-form-page h2 {
+    color: #173c2a;
+    letter-spacing: -0.02em;
+}
+
+@media (max-width: 700px) {
+    .agent-content .agent-form-page {
+        width: calc(100% - 28px);
+        margin: 1rem 14px 2rem;
+        padding: 1.25rem;
+    }
+}
+
 .section-kicker {
     font-size: 0.72rem;
     font-weight: 700;

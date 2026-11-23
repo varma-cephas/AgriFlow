@@ -1,0 +1,46 @@
+@page
+@model AgriFlow.Pages.Agent.DashboardModel
+@{
+    Layout = "_AgentLayout";
+    ViewData["Title"] = "Agent Overview";
+}
+
+<div class="agent-hero">
+    <div>
+        <div class="agent-eyebrow">FIELD AGENT · E-SUBIRA DISTRICT</div>
+        <h1>Good morning, @User.Identity?.Name?.Split(' ').FirstOrDefault()</h1>
+        <p>You support @Model.Overview.AssignedFarmers farmers · Keep their farm work moving.</p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-page="/Agent/MyFarmers" class="btn btn-light btn-sm"><i class="bi bi-people me-1"></i> Open a farmer's workspace</a>
+            <a asp-page="/Account/RegisterFarmer" class="btn btn-outline-light btn-sm"><i class="bi bi-person-plus me-1"></i> Register a farmer</a>
+        </div>
+    </div>
+    <div class="agent-next-visit"><i class="bi bi-calendar-check fs-4"></i><div><strong>Next visit</strong><br /><span>No visit scheduled</span></div></div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-md-3"><div class="agent-stat"><i class="bi bi-people"></i><strong>@Model.Overview.AssignedFarmers</strong><span>Assigned farmers</span><small>Farmers assigned to you</small></div></div>
+    <div class="col-md-3"><div class="agent-stat"><i class="bi bi-droplet"></i><strong>@Model.Overview.ActiveBatches</strong><span>Active batches</span><small>Across your farmers</small></div></div>
+    <div class="col-md-3"><div class="agent-stat"><i class="bi bi-calendar-event"></i><strong>@Model.Overview.HarvestsDue</strong><span>Harvests due</span><small>Within 14 days</small></div></div>
+    <div class="col-md-3"><div class="agent-stat"><i class="bi bi-box-seam"></i><strong>@Model.Overview.OrdersToHandle</strong><span>Orders to handle</span><small>Confirm or dispatch</small></div></div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-8">
+        <div class="agent-card">
+            <div class="d-flex justify-content-between align-items-center mb-3"><div><h5>Your farmers at a glance</h5><p>Season progress and what each farmer needs next.</p></div><a asp-page="/Agent/MyFarmers" class="small text-success fw-semibold">View all</a></div>
+            @if (Model.Farmers.Count == 0)
+            {
+                <div class="agent-empty"><i class="bi bi-people fs-2"></i><p class="mb-1 fw-semibold">No farmers assigned yet</p><p class="small mb-0">Register a farmer or ask an administrator to assign one to you.</p></div>
+            }
+            else
+            {
+                @foreach (var farmer in Model.Farmers.Take(5))
+                {
+                    <div class="agent-farmer-row"><div class="agent-avatar">@farmer.FullName.Substring(0, 1).ToUpper()</div><div class="flex-grow-1"><strong>@farmer.FullName</strong><small>@farmer.FarmName · @farmer.District</small></div><span class="agent-pill">@farmer.VerificationStatus</span><a asp-page="/Agent/MyFarmers" class="small text-success">Open →</a></div>
+                }
+            }
+        </div>
+    </div>
+    <div class="col-lg-4"><div class="agent-card h-100"><h5>Needs your attention</h5><p>Actions for your assigned farmers.</p><div class="agent-action"><i class="bi bi-person-plus"></i><span>Register a farmer<br /><small>Start a new farmer profile</small></span><a asp-page="/Account/RegisterFarmer">→</a></div><div class="agent-action"><i class="bi bi-box-seam"></i><span>Review farm stock<br /><small>Check low seed stock</small></span><a asp-page="/Agent/MyFarmers">→</a></div></div></div>
+</div>

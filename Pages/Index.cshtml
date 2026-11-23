@@ -15,7 +15,7 @@
                 <div>
                     <h4 class="fw-bold mb-0">Welcome back, @User.Identity?.Name</h4>
                     <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
-                        @ViewData["UserRole"] Account
+                         @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value Account
                     </span>
                 </div>
             </div>

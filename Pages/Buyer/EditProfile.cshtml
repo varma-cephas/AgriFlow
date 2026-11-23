@@ -1,18 +1,10 @@
 ﻿@page
 @model AgriFlow.Pages.Buyer.EditProfileModel
 @{
-    ViewData["Title"] = "Edit Business Details";
+    Layout = "_BuyerLayout";
+    ViewData["Title"] = "Business profile";
 }
-
-<div class="card border-0 shadow-sm" style="max-width: 640px;">
-    <div class="card-body p-4">
-        <h4 class="fw-bold mb-1">Edit Business Details</h4>
-        <p class="text-muted small mb-4">Update your business address, contact phone, or RDB registration details.</p>
-
-        <div class="alert alert-info small mb-4">
-            <i class="bi bi-tools me-1"></i> Business profile editing form will be implemented here next.
-        </div>
-
-        <a asp-page="/Buyer/Dashboard" class="btn btn-outline-secondary btn-sm">Back to Marketplace</a>
-    </div>
+<div class="buyer-page">
+    <div class="buyer-heading"><div><div class="buyer-eyebrow">ACCOUNT SETTINGS</div><h1>Business profile</h1><p>Review the business information connected to your AgriFlow account.</p></div><a asp-page="/Buyer/Dashboard" class="buyer-outline-button"><i class="bi bi-arrow-left me-2"></i>Back to overview</a></div>
+    <div class="buyer-card" style="max-width: 760px;"><div class="buyer-card-header"><div><h2>Business details</h2><p>Your verified registration information is managed by AgriFlow administrators.</p></div><span class="buyer-count-badge"><i class="bi bi-shield-check me-1"></i> Verified account</span></div><div class="buyer-info-note mb-3"><i class="bi bi-info-circle"></i><span>Profile editing will be enabled in the next release. Contact support if your registered business information needs correction.</span></div><div class="buyer-empty"><i class="bi bi-building"></i><h3>Business profile management</h3><p>Business name, RDB code, address, phone, and procurement preferences will be available here.</p><a asp-page="/Buyer/Dashboard" class="buyer-primary-button">Return to dashboard</a></div></div>
 </div>

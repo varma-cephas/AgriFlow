@@ -1,0 +1,67 @@
+@page
+@model AgriFlow.Pages.Farmer.MarketplaceModel
+@{
+    Layout = "_FarmerLayout";
+    ViewData["Title"] = "Marketplace";
+}
+
+<div class="farmer-page">
+    <div class="farmer-heading">
+        <div>
+            <div class="farmer-eyebrow">AGRI MARKETPLACE</div>
+            <h1>Marketplace</h1>
+            <p>Browse active harvest listings from farmers across AgriFlow.</p>
+        </div>
+        <a asp-page="/Farmer/Listings" class="btn btn-success">
+            <i class="bi bi-tag me-1"></i> Manage my listings
+        </a>
+    </div>
+
+    <div class="farmer-card">
+        <div class="farmer-card-header">
+            <div>
+                <h3>Available produce</h3>
+                <span>@Model.Listings.Count active listing(s)</span>
+            </div>
+        </div>
+
+        @if (!Model.Listings.Any())
+        {
+            <div class="farmer-empty">
+                <i class="bi bi-shop"></i>
+                <h5>No marketplace listings yet</h5>
+                <p>Active harvest listings will appear here when farmers publish produce.</p>
+                <a asp-page="/Farmer/Listings" class="btn btn-outline-success btn-sm">Create a listing</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var item in Model.Listings)
+                {
+                    <div class="col-md-6 col-xl-4">
+                        <div class="marketplace-product">
+                            <div class="marketplace-product-icon">@item.CropName.Substring(0, 1).ToUpperInvariant()</div>
+                            <div class="marketplace-product-body">
+                                <div class="d-flex justify-content-between gap-2">
+                                    <h4>@item.CropName</h4>
+                                    <span class="badge bg-success">Open</span>
+                                </div>
+                                <p class="marketplace-farmer">
+                                    <i class="bi bi-person"></i> @item.FarmerName<br />
+                                    <i class="bi bi-geo-alt"></i> @item.FarmName
+                                </p>
+                                <div class="marketplace-price">RWF @item.PricePerUnit.ToString("N0") <small>/ @item.Unit</small></div>
+                                <div class="marketplace-quantity">
+                                    <span>Available</span>
+                                    <strong>@item.AvailableQuantity.ToString("0.##") @item.Unit</strong>
+                                </div>
+                                <small class="text-muted">Listed @item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

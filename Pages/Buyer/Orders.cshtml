@@ -1,0 +1,65 @@
+@page
+@model AgriFlow.Pages.Buyer.OrdersModel
+@{ Layout = "_BuyerLayout"; ViewData["Title"] = "My orders"; }
+<div class="buyer-page">
+    <div class="buyer-heading">
+        <div>
+            <div class="buyer-eyebrow">PROCUREMENT</div>
+            <h1>My orders</h1>
+            <p>Track reservations, confirmations, dispatch, and delivery.</p>
+        </div>
+        <span class="buyer-count-badge">
+            <i class="bi bi-box-seam"></i> @Model.Orders.Count orders
+        </span>
+    </div>
+    @if (TempData["SuccessMessage"] is string message) {
+        <div class="alert alert-success small">
+            <i class="bi bi-check-circle me-1"></i>@message
+        </div>
+    }
+    <div class="buyer-card">
+        @if (!Model.Orders.Any()) {
+            <div class="buyer-empty">
+                <i class="bi bi-box-seam"></i>
+                <h3>No orders yet</h3>
+                <p>Your orders will appear here after you reserve produce from the marketplace.</p>
+                <a asp-page="/Buyer/Marketplace" class="buyer-primary-button">Browse marketplace</a>
+            </div>
+        } else {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Produce</th>
+                            <th>Farmer</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Orders) {
+                            <tr>
+                                <td>
+                                    <strong>#@item.OrderId</strong>
+                                    <small class="d-block text-muted">@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                                </td>
+                                <td>@item.CropName</td>
+                                <td>
+                                    <strong>@item.FarmerName</strong>
+                                    <small class="d-block text-muted">@item.FarmName</small>
+                                </td>
+                                <td>@item.Quantity.ToString("0.##") @item.Unit</td>
+                                <td>RWF @item.TotalAmount.ToString("N0")</td>
+                                <td>
+                                    <span class="badge bg-light text-dark">@item.Status</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

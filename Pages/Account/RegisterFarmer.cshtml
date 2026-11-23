@@ -1,16 +1,26 @@
 ﻿@page
 @model AgriFlow.Pages.Account.RegisterFarmerModel
 @{
-    Layout = "_AuthLayout";
+    Layout = User.IsInRole("Agent") ? "_AgentLayout" : "_AuthLayout";
     ViewData["Title"] = "Create Farmer Account";
 }
 
-<h2 class="fw-bold mb-1">Create your account</h2>
+<div class="agent-form-page">
+<h2 class="fw-bold mb-1">@(User.IsInRole("Agent") ? "Register a farmer" : "Create your account")</h2>
 <p class="text-muted small mb-4">
-    Already have one? <a asp-page="/Account/Login" class="text-success fw-semibold text-decoration-none">Sign in.</a>
+    @if (User.IsInRole("Agent"))
+    {
+        <span>Register a farmer on behalf of your assigned field area.</span>
+    }
+    else
+    {
+        <span>Already have one? <a asp-page="/Account/Login" class="text-success fw-semibold text-decoration-none">Sign in.</a></span>
+    }
 </p>
 
 <!-- Role Switcher -->
+@if (!User.IsInRole("Agent"))
+{
 <div class="section-kicker">I AM A...</div>
 <div class="row g-3 mb-4">
     <div class="col-sm-6">
@@ -38,6 +48,7 @@
         </a>
     </div>
 </div>
+}
 
 <form method="post" novalidate>
     <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
@@ -179,7 +190,7 @@
         <div><span asp-validation-for="Input.AgreeToTerms" class="text-danger small"></span></div>
     </div>
 
-    <button type="submit" class="btn btn-agriflow w-100 mb-3">Create farmer account</button>
+    <button type="submit" class="btn btn-agriflow w-100 mb-3">@(User.IsInRole("Agent") ? "Register farmer" : "Create farmer account")</button>
 
     <!-- Bottom Green Info Callout -->
     <div class="callout-green d-flex align-items-start gap-2">
@@ -192,6 +203,7 @@
         </div>
     </div>
 </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
