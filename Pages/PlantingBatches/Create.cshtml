@@ -1,0 +1,337 @@
+@page
+@model AgriFlow.Pages.PlantingBatches.CreateModel
+@{
+    ViewData["Title"] = "Record Planting";
+    var selectedFarm = Model.Farms.FirstOrDefault(farm => farm.Id == Model.FarmId);
+}
+
+<div class="planting-page">
+<div class="d-flex align-items-center gap-3 mb-4 planting-page-header">
+    <div class="planting-title-icon"><i class="bi bi-sprout"></i></div>
+    <div>
+        <h1 class="h3 fw-bold mb-1">Record planting</h1>
+        <p class="text-muted mb-0">Seed is deducted from stock and an upcoming listing is created for buyers to reserve.</p>
+    </div>
+</div>
+
+@if (Model.Farms.Count == 0)
+{
+    <div class="alert alert-info">No farm is currently linked to your account. Ask an administrator to assign your farm before recording a planting.</div>
+}
+else
+{
+    @if (Model.Farms.Count > 1)
+    {
+        <form method="get" class="card planting-card mb-3">
+            <div class="card-body d-flex align-items-center gap-3">
+                <label for="FarmId" class="form-label fw-semibold mb-0">Farm</label>
+                <select id="FarmId" name="FarmId" class="form-select" onchange="this.form.submit()">
+                    @foreach (var farm in Model.Farms)
+                    {
+                        <option value="@farm.Id" selected="@(farm.Id == Model.FarmId)">@farm.Name — @farm.District</option>
+                    }
+                </select>
+            </div>
+        </form>
+    }
+
+    @if (!Model.FarmVerified)
+    {
+        <div class="alert planting-info-alert d-flex gap-2 align-items-start" role="status">
+            <i class="bi bi-info-circle-fill mt-1"></i>
+            <div><strong>Farm verification is pending.</strong> This listing will be created as Upcoming, but it will remain hidden from buyers until your farm verification is completed.</div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.PageError))
+    {
+        <div class="alert alert-danger" role="alert">@Model.PageError</div>
+    }
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <form method="post" id="plantingForm">
+        <input type="hidden" asp-for="FarmId" />
+        <input type="hidden" asp-for="Input.BatchCode" />
+        <input type="hidden" asp-for="Input.ListingCode" />
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card planting-card mb-4">
+                    <div class="card-header planting-card-header pt-4 px-4">
+                        <h2 class="h5 fw-bold mb-1">Planting details</h2>
+                        <p class="small text-muted mb-0">What you planted, where and when.</p>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        @if (selectedFarm is not null && Model.Farms.Count == 1)
+                        {
+                            <div class="small text-muted mb-3"><i class="bi bi-house-door me-1"></i>@selectedFarm.Name · @selectedFarm.District</div>
+                        }
+                        <div class="mb-3">
+                            <label asp-for="Input.SeedStockId" class="form-label fw-semibold">Seed stock</label>
+                            <select asp-for="Input.SeedStockId" class="form-select" id="seedStockSelect" required>
+                                <option value="0">Choose seed stock</option>
+                                @foreach (var seed in Model.SeedStocks)
+                                {
+                                    <option value="@seed.Id" data-crop="@seed.CropName" data-variety="@seed.Variety" data-stock="@seed.Quantity.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-unit="@seed.Unit" data-maturity="@seed.MaturityDays" data-yield-factor="@seed.YieldFactor.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                        @seed.CropName · @seed.Variety — @seed.Quantity.ToString("0.##") @seed.Unit in stock
+                                    </option>
+                                }
+                            </select>
+                            <div class="form-text" id="seedMeta">Maturity and yield estimates update when seed stock is selected.</div>
+                            <span asp-validation-for="Input.SeedStockId" class="text-danger small"></span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label asp-for="Input.QuantityPlanted" class="form-label fw-semibold">Quantity planted</label>
+                                <div class="input-group">
+                                    <input asp-for="Input.QuantityPlanted" id="quantityPlanted" class="form-control" type="number" min="0.01" step="0.01" required />
+                                    <span class="input-group-text" id="seedUnitSuffix">kg</span>
+                                </div>
+                                <div class="form-text">Stock remaining: <strong id="remainingStock">—</strong> <span id="remainingUnit"></span></div>
+                                <div class="small fw-semibold d-none planting-low-stock" id="inlineLowStock"><i class="bi bi-exclamation-triangle me-1"></i><span id="lowStockText">Low seed stock after planting.</span></div>
+                                <span asp-validation-for="Input.QuantityPlanted" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-5">
+                                <label asp-for="Input.PlantingDate" class="form-label fw-semibold">Planting date</label>
+                                <input asp-for="Input.PlantingDate" class="form-control" type="date" required />
+                                <span asp-validation-for="Input.PlantingDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-7">
+                                <label asp-for="Input.FieldChoice" class="form-label fw-semibold">Field</label>
+                                <select asp-for="Input.FieldChoice" class="form-select" id="fieldChoice" required>
+                                    <option value="">Choose a field</option>
+                                    @foreach (var field in Model.ExistingFields)
+                                    {
+                                        <option value="@field">@field</option>
+                                    }
+                                    <option value="__new_field__">+ Add a new field</option>
+                                </select>
+                                <input asp-for="Input.NewFieldName" class="form-control mt-2 d-none" id="newFieldName" maxlength="60" placeholder="Enter field name" />
+                                <span asp-validation-for="Input.FieldChoice" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-5">
+                                <label asp-for="Input.AreaAcres" class="form-label fw-semibold">Area planted</label>
+                                <div class="input-group">
+                                    <input asp-for="Input.AreaAcres" class="form-control" type="number" min="0.01" step="0.01" required />
+                                    <span class="input-group-text">acres</span>
+                                </div>
+                                <span asp-validation-for="Input.AreaAcres" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card planting-card">
+                    <div class="card-header planting-card-header pt-4 px-4">
+                        <h2 class="h5 fw-bold mb-1">Listing terms for buyers</h2>
+                        <p class="small text-muted mb-0">Buyers can reserve this harvest as soon as you save.</p>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.SellingUnit" class="form-label fw-semibold">Selling unit</label>
+                                <select asp-for="Input.SellingUnit" class="form-select" id="sellingUnit">
+                                    @foreach (var unit in Model.UnitOptions)
+                                    {
+                                        <option value="@unit.Value">@unit.Label</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Grade" class="form-label fw-semibold">Grade</label>
+                                <select asp-for="Input.Grade" class="form-select">
+                                    <option value="A">Grade A</option>
+                                    <option value="B">Grade B</option>
+                                    <option value="C">Grade C</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.PricePerUnit" class="form-label fw-semibold">Price per unit</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">RWF</span>
+                                    <input asp-for="Input.PricePerUnit" class="form-control" type="number" min="0.01" step="1" required />
+                                </div>
+                                <span asp-validation-for="Input.PricePerUnit" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.MinimumOrder" class="form-label fw-semibold">Minimum order</label>
+                                <div class="input-group">
+                                    <input asp-for="Input.MinimumOrder" class="form-control" type="number" min="0.01" step="0.01" required />
+                                    <span class="input-group-text" id="minimumOrderSuffix">crates</span>
+                                </div>
+                                <span asp-validation-for="Input.MinimumOrder" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="estimatedYield" class="form-label fw-semibold">Estimated yield</label>
+                                <input id="estimatedYield" class="form-control planting-estimate" readonly value="Choose seed stock" />
+                                <div class="form-text">Approximate quantity in your selected selling unit.</div>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center pt-md-3">
+                                <div class="form-check form-switch">
+                                    <input asp-for="Input.OpenForReservationsNow" class="form-check-input planting-switch" role="switch" id="openReservations" />
+                                    <label asp-for="Input.OpenForReservationsNow" class="form-check-label fw-semibold">Open for reservations now</label>
+                                    <div class="form-text">Turn off to keep this listing hidden until harvest.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-page="/Index" class="btn btn-outline-secondary planting-cancel">Cancel</a>
+                    <button type="submit" class="btn btn-success planting-primary px-4"><i class="bi bi-check-lg me-1"></i>Save planting</button>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card planting-card mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3">Summary</h2>
+                        <dl class="row small mb-0">
+                            <dt class="col-7 text-muted">Crop maturity</dt><dd class="col-5 text-end fw-semibold" id="summaryMaturity">—</dd>
+                            <dt class="col-7 text-muted">Expected harvest</dt><dd class="col-5 text-end fw-semibold" id="summaryHarvest">—</dd>
+                            <dt class="col-7 text-muted">Seed left after planting</dt><dd class="col-5 text-end fw-semibold" id="summaryRemaining">—</dd>
+                            <dt class="col-7 text-muted">New batch preview</dt><dd class="col-5 text-end fw-semibold font-monospace">@Model.Input.BatchCode</dd>
+                            <dt class="col-7 text-muted">Listing status</dt><dd class="col-5 text-end"><span class="badge planting-upcoming">Upcoming</span></dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card planting-card mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-1">Buyers will see</h2>
+                        <p class="small text-muted mb-3">Preview of the marketplace card</p>
+                        <div class="marketplace-preview">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="crop-initial" id="previewInitial">C</div>
+                                <div class="flex-grow-1">
+                                    <h3 class="h6 fw-bold mb-1" id="previewCrop">Crop listing</h3>
+                                    <div class="small text-muted">@Model.FarmName · @Model.FarmProvince</div>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2"><span class="badge planting-upcoming">Upcoming</span><span class="badge planting-grade" id="previewGrade">Grade A</span></div>
+                            <div class="mt-3 fw-bold text-success" id="previewPrice">RWF — <span class="small fw-normal text-muted">/ unit</span></div>
+                            <div class="small text-muted mt-2"><span id="previewQuantity">Estimated qty —</span> · Min order <span id="previewMinimum">—</span> · Harvest <span id="previewHarvest">—</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planting-info-box mb-0">
+                    <h2 class="h6 fw-bold"><i class="bi bi-info-circle me-1"></i>What happens when you save</h2>
+                    <p class="small mb-0" id="saveSummary">Seed stock is deducted, batch @Model.Input.BatchCode is created, and an Upcoming listing is opened for buyers to reserve.</p>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+</div>
+
+<div class="modal fade planting-page-modal" id="notEnoughSeedModal" tabindex="-1" aria-labelledby="notEnoughSeedTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" id="notEnoughSeedModalContent" data-seed-name="@Model.StockSeedName" data-entered="@Model.StockEntered.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-available="@Model.StockAvailable.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+            <div class="modal-header border-0 pb-0">
+                <h2 class="h5 modal-title fw-bold" id="notEnoughSeedTitle"><i class="bi bi-exclamation-triangle-fill planting-modal-icon me-2"></i><span id="stockModalTitle">Not enough seed</span></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="stockErrorMessage"></div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="changeQuantityButton">Change quantity</button>
+                <a asp-page="/SeedStock/Add" asp-route-farmId="@Model.FarmId" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>Add seed stock</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const seedSelect = document.getElementById('seedStockSelect');
+            const quantityInput = document.getElementById('quantityPlanted');
+            const plantingDate = document.getElementById('Input_PlantingDate');
+            const unitSelect = document.getElementById('sellingUnit');
+            const gradeSelect = document.getElementById('Input_Grade');
+            const priceInput = document.getElementById('Input_PricePerUnit');
+            const minimumInput = document.getElementById('Input_MinimumOrder');
+            const fieldSelect = document.getElementById('fieldChoice');
+            const newFieldInput = document.getElementById('newFieldName');
+            const unitSizes = { crate: 25, kg: 1, sack: 50 };
+            const unitLabels = { crate: 'crates', kg: 'kg', sack: 'sacks' };
+            const fmt = value => Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 });
+            const dateFmt = value => value ? new Date(value + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+
+            function updatePreview() {
+                if (!seedSelect) return;
+                const option = seedSelect.selectedOptions[0];
+                const hasSeed = option && option.value !== '0';
+                const stock = hasSeed ? Number(option.dataset.stock) : 0;
+                const planted = Number(quantityInput?.value) || 0;
+                const remaining = stock - planted;
+                const maturity = hasSeed ? Number(option.dataset.maturity) : 0;
+                const factor = hasSeed ? Number(option.dataset.yieldFactor) : 0;
+                const unitSize = unitSizes[unitSelect?.value] || 1;
+                const sellingUnitLabel = unitLabels[unitSelect?.value] || unitSelect?.value || 'units';
+                const harvestDate = plantingDate?.value && maturity ? (() => {
+                    const [year, month, day] = plantingDate.value.split('-').map(Number);
+                    const date = new Date(Date.UTC(year, month - 1, day));
+                    date.setUTCDate(date.getUTCDate() + maturity);
+                    return date.toISOString().slice(0, 10);
+                })() : '';
+                const estimated = planted * factor / unitSize;
+                const cropName = hasSeed ? option.dataset.crop : 'Crop listing';
+                const variety = hasSeed ? option.dataset.variety : '';
+                const seedUnit = hasSeed ? option.dataset.unit : '';
+                const lowStock = hasSeed && remaining <= 10;
+
+                document.getElementById('seedMeta').textContent = hasSeed ? `${maturity} days to maturity · yield factor ${fmt(factor)} kg per kg of seed` : 'Maturity and yield estimates update when seed stock is selected.';
+                document.getElementById('seedUnitSuffix').textContent = seedUnit || 'kg';
+                document.getElementById('remainingStock').textContent = hasSeed ? fmt(Math.max(remaining, 0)) : '—';
+                document.getElementById('remainingUnit').textContent = seedUnit;
+                document.getElementById('inlineLowStock').classList.toggle('d-none', !lowStock);
+                document.getElementById('lowStockText').textContent = `Low seed stock after planting — ${fmt(Math.max(remaining, 0))} ${seedUnit} left.`;
+                document.getElementById('summaryMaturity').textContent = hasSeed ? `${maturity} days` : '—';
+                document.getElementById('summaryHarvest').textContent = dateFmt(harvestDate);
+                const remainingSummary = document.getElementById('summaryRemaining');
+                remainingSummary.textContent = hasSeed ? `${fmt(Math.max(remaining, 0))} ${seedUnit}` : '—';
+                remainingSummary.classList.toggle('remaining-seed-low', lowStock);
+                document.getElementById('previewCrop').textContent = hasSeed ? `${cropName} ${variety}` : 'Crop listing';
+                document.getElementById('previewInitial').textContent = hasSeed ? cropName.charAt(0).toUpperCase() : 'C';
+                document.getElementById('estimatedYield').value = hasSeed ? `${fmt(estimated)} ${sellingUnitLabel}` : 'Choose seed stock';
+                document.getElementById('previewPrice').innerHTML = `RWF ${fmt(Number(priceInput?.value) || 0)} <span class="small fw-normal text-muted">/ ${sellingUnitLabel}</span>`;
+                document.getElementById('previewGrade').textContent = `Grade ${gradeSelect?.value || 'A'}`;
+                document.getElementById('previewQuantity').textContent = `Estimated qty ${hasSeed ? fmt(estimated) : '—'} ${sellingUnitLabel}`;
+                document.getElementById('previewMinimum').textContent = `${fmt(Number(minimumInput?.value) || 0)} ${sellingUnitLabel}`;
+                document.getElementById('previewHarvest').textContent = dateFmt(harvestDate);
+                document.getElementById('minimumOrderSuffix').textContent = sellingUnitLabel;
+                document.getElementById('saveSummary').textContent = `Seed stock is deducted by ${fmt(planted)} ${seedUnit || 'kg'}, batch ${document.querySelector('[name="Input.BatchCode"]').value} is created, and an Upcoming listing is opened for buyers to reserve.`;
+            }
+
+            [seedSelect, quantityInput, plantingDate, unitSelect, gradeSelect, priceInput, minimumInput].forEach(element => element?.addEventListener('input', updatePreview));
+            [seedSelect, unitSelect, gradeSelect].forEach(element => element?.addEventListener('change', updatePreview));
+            fieldSelect?.addEventListener('change', () => {
+                const addingField = fieldSelect.value === '__new_field__';
+                newFieldInput.classList.toggle('d-none', !addingField);
+                newFieldInput.required = addingField;
+                if (addingField) newFieldInput.focus();
+            });
+            let focusQuantityAfterClose = false;
+            const stockModal = document.getElementById('notEnoughSeedModal');
+            document.getElementById('changeQuantityButton')?.addEventListener('click', () => { focusQuantityAfterClose = true; });
+            stockModal?.addEventListener('hidden.bs.modal', () => {
+                if (focusQuantityAfterClose) {
+                    focusQuantityAfterClose = false;
+                    setTimeout(() => quantityInput?.focus(), 0);
+                }
+            });
+            updatePreview();
+
+            @if (Model.ShowStockModal)
+            {
+                <text>
+                const stockDetails = document.getElementById('notEnoughSeedModalContent').dataset;
+                document.getElementById('stockModalTitle').textContent = `Not enough ${stockDetails.seedName} seed`;
+                document.getElementById('stockErrorMessage').textContent = `You entered ${fmt(Number(stockDetails.entered))}, but only ${fmt(Number(stockDetails.available))} is in stock. Reduce the quantity planted or add seed stock first.`;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('notEnoughSeedModal')).show();
+                </text>
+            }
+        })();
+    </script>
+}
