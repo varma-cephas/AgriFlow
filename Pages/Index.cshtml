@@ -1,27 +1,332 @@
 ﻿@page
 @model IndexModel
+@using System.Text.Json
 @{
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="py-4">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-3 d-flex align-items-center justify-content-center"
-                     style="width: 44px; height: 44px; background-color: #eef7f1; color: #1b653c;">
-                    <i class="bi bi-sprout fs-4"></i>
+@if (Model.IsFarmer)
+{
+    <div class="dashboard-workspace">
+        <div class="workspace-shell dashboard-shell">
+            <aside class="workspace-sidebar" aria-label="Farm navigation">
+                <div class="workspace-sidebar-label">FARM WORKSPACE</div>
+                <a class="workspace-sidebar-link active" href="/" aria-current="page">
+                    <i class="bi bi-grid-1x2-fill"></i><span>Overview</span>
+                </a>
+                <a class="workspace-sidebar-link" href="/PlantingBatches/Index">
+                    <i class="bi bi-flower1"></i><span>Plantings</span>
+                </a>
+                <a class="workspace-sidebar-link" href="/SeedStock/Index">
+                    <i class="bi bi-box-seam"></i><span>Seed stock</span>
+                </a>
+                <a class="workspace-sidebar-link" href="/Farmer/Orders">
+                    <i class="bi bi-receipt"></i><span>Orders</span>
+                </a>
+                <a class="workspace-sidebar-link" href="/Farmer/EditProfile">
+                    <i class="bi bi-house-gear"></i><span>Farm profile</span>
+                </a>
+            </aside>
+
+            <main class="dashboard-main">
+                <div class="dashboard-content">
+                    @if (Model.Dashboard.ErrorMessage is not null)
+                    {
+                        <div class="alert dashboard-error mb-3" role="alert">@Model.Dashboard.ErrorMessage</div>
+                    }
+                    @if (Model.Dashboard.IsUnverified)
+                    {
+                        <div class="dashboard-verification mb-3" role="status">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            Your farm is being checked – buyers can't see your listings yet
+                        </div>
+                    }
+
+                    <section class="dashboard-hero mb-4" aria-labelledby="dashboard-heading">
+                        <div class="dashboard-hero-copy">
+                            <div class="dashboard-date">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</div>
+                            <h1 id="dashboard-heading">@((DateTime.Now.Hour < 12) ? "Good morning" : DateTime.Now.Hour < 17 ? "Good afternoon" : "Good evening"), @User.Identity?.Name</h1>
+                            <p class="dashboard-hero-subtitle">
+                                @Model.Dashboard.FarmName
+                                @if (!string.IsNullOrWhiteSpace(Model.Dashboard.District) || !string.IsNullOrWhiteSpace(Model.Dashboard.Province))
+                                {
+                                    <span> · @Model.Dashboard.District, @Model.Dashboard.Province</span>
+                                }
+                                · @Model.Dashboard.FieldCount fields
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn dashboard-hero-primary" href="/PlantingBatches/Create">
+                                    <i class="bi bi-plus-lg me-1"></i> Record planting
+                                </a>
+                                <a class="btn dashboard-hero-secondary" href="/SeedStock/Index">
+                                    <i class="bi bi-box-seam me-1"></i> Add seed stock
+                                </a>
+                            </div>
+                        </div>
+                        <div class="dashboard-order-highlight">
+                            <div class="dashboard-order-icon"><i class="bi bi-bag-check"></i></div>
+                            <div>
+                                <div class="dashboard-order-count">@Model.Dashboard.OrdersToConfirm buyer orders are waiting for you</div>
+                                <div class="dashboard-order-value">Worth RWF @Model.Dashboard.PendingOrdersValueRwf.ToString("N0")</div>
+                                <p class="mb-0">Confirm them so buyers can plan deliveries.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row g-3 mb-4" aria-label="Farm performance indicators">
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <article class="dashboard-card dashboard-kpi h-100">
+                                <div class="dashboard-kpi-top">
+                                    <span class="dashboard-kpi-icon kpi-green"><i class="bi bi-flower1"></i></span>
+                                    <span class="dashboard-delta">+@Model.Dashboard.BatchesAddedThisMonth this month</span>
+                                </div>
+                                <div class="dashboard-kpi-value">@Model.Dashboard.ActiveBatches</div>
+                                <div class="dashboard-kpi-label">Active batches</div>
+                                <div class="dashboard-muted">@Model.Dashboard.ReadyWithinFourteenDays ready within 14 days</div>
+                            </article>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <article class="dashboard-card dashboard-kpi h-100">
+                                <div class="dashboard-kpi-top">
+                                    <span class="dashboard-kpi-icon kpi-blue"><i class="bi bi-basket2"></i></span>
+                                    <span class="dashboard-delta">+@Model.Dashboard.UpcomingListingCount upcoming</span>
+                                </div>
+                                <div class="dashboard-kpi-value">@Model.Dashboard.ReservedTons.ToString("0.0") t</div>
+                                <div class="dashboard-kpi-label">Reserved by buyers</div>
+                                <div class="dashboard-muted">On @Model.Dashboard.UpcomingListingCount upcoming listings</div>
+                            </article>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <article class="dashboard-card dashboard-kpi h-100">
+                                <div class="dashboard-kpi-top">
+                                    <span class="dashboard-kpi-icon kpi-purple"><i class="bi bi-currency-exchange"></i></span>
+                                    <span class="dashboard-delta">@Model.Dashboard.PaidOrdersThisMonth paid</span>
+                                </div>
+                                <div class="dashboard-kpi-value dashboard-sales-value">@Model.Dashboard.SalesDisplay</div>
+                                <div class="dashboard-kpi-label">Sales this month</div>
+                                <div class="dashboard-muted">@Model.Dashboard.PaidOrdersThisMonth orders delivered and paid</div>
+                            </article>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <article class="dashboard-card dashboard-kpi h-100">
+                                <div class="dashboard-kpi-top">
+                                    <span class="dashboard-kpi-icon kpi-amber"><i class="bi bi-exclamation-triangle"></i></span>
+                                    <span class="dashboard-restock-pill">Restock</span>
+                                </div>
+                                <div class="dashboard-kpi-value">@Model.Dashboard.LowStockCount</div>
+                                <div class="dashboard-kpi-label">Low seed stock</div>
+                                <div class="dashboard-muted">
+                                    @(Model.Dashboard.LowStockCropNames.Count == 0 ? "All stock levels look good" : string.Join(", ", Model.Dashboard.LowStockCropNames))
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="row g-3 mb-4">
+                        <div class="col-12 col-xl-8">
+                            <article class="dashboard-card dashboard-panel h-100">
+                                <div class="dashboard-panel-heading">
+                                    <div>
+                                        <h2>Supply pipeline · next 8 weeks</h2>
+                                        <p>Expected harvest and how much buyers have reserved (tonnes)</p>
+                                    </div>
+                                    <div class="dashboard-legend">
+                                        <span><i class="legend-dot legend-reserved"></i>Reserved</span>
+                                        <span><i class="legend-dot legend-open"></i>Still open</span>
+                                    </div>
+                                </div>
+                                <div class="dashboard-chart-wrap">
+                                    <canvas id="supplyPipelineChart" aria-label="Expected harvest supply pipeline for the next eight weeks" role="img"></canvas>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-12 col-xl-4">
+                            <article class="dashboard-card dashboard-panel h-100">
+                                <div class="dashboard-panel-heading dashboard-attention-heading">
+                                    <h2>Needs your attention</h2>
+                                    <span class="dashboard-attention-count">@Model.Dashboard.AttentionCount items</span>
+                                </div>
+                                <div class="dashboard-attention-list">
+                                    <div class="dashboard-attention-row">
+                                        <span class="dashboard-attention-icon kpi-blue"><i class="bi bi-receipt"></i></span>
+                                        <span class="dashboard-attention-label">Orders to confirm <small>@Model.Dashboard.OrdersToConfirm waiting</small></span>
+                                        <a href="/Farmer/Orders">Review <span aria-hidden="true">→</span></a>
+                                    </div>
+                                    <div class="dashboard-attention-row">
+                                        <span class="dashboard-attention-icon kpi-green"><i class="bi bi-basket"></i></span>
+                                        <span class="dashboard-attention-label">Batches ready to harvest <small>@Model.Dashboard.ReadyForHarvest ready now</small></span>
+                                        <a href="/PlantingBatches/Index">Record <span aria-hidden="true">→</span></a>
+                                    </div>
+                                    <div class="dashboard-attention-row">
+                                        <span class="dashboard-attention-icon kpi-amber"><i class="bi bi-box-seam"></i></span>
+                                        <span class="dashboard-attention-label">Seed stocks running low <small>@Model.Dashboard.LowStockCount items need a refill</small></span>
+                                        <a href="/SeedStock/Index">Restock <span aria-hidden="true">→</span></a>
+                                    </div>
+                                    <div class="dashboard-attention-row">
+                                        <span class="dashboard-attention-icon kpi-purple"><i class="bi bi-truck"></i></span>
+                                        <span class="dashboard-attention-label">Deliveries awaiting buyer check <small>@Model.Dashboard.DeliveriesAwaitingCheck awaiting check</small></span>
+                                        <a href="/Farmer/Orders">View <span aria-hidden="true">→</span></a>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-card dashboard-table-card mb-4">
+                        <div class="dashboard-panel-heading dashboard-table-heading">
+                            <div>
+                                <h2>Upcoming harvests</h2>
+                                <p>Buyers can already reserve these. Reservations are filled oldest first when you record the harvest.</p>
+                            </div>
+                            <a class="dashboard-view-all" href="/PlantingBatches/Index">View all batches <span aria-hidden="true">→</span></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table dashboard-table align-middle mb-0">
+                                <thead>
+                                    <tr><th>Batch / crop</th><th>Field</th><th>Expected</th><th>Est. yield</th><th>Reserved</th><th>Status</th><th>Action</th></tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Dashboard.UpcomingHarvests.Count == 0)
+                                    {
+                                        <tr><td colspan="7" class="dashboard-empty">No active batches yet. Record your first planting to see expected harvests here.</td></tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var harvest in Model.Dashboard.UpcomingHarvests)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="dashboard-crop-initial">@harvest.CropName[..1]</span>
+                                                        <span><strong>@harvest.BatchCode · @harvest.CropName</strong><small>Grade @harvest.Grade</small></span>
+                                                    </div>
+                                                </td>
+                                                <td>@harvest.FieldName</td>
+                                                <td>@harvest.ExpectedDate.ToString("dd MMM yyyy")</td>
+                                                <td><strong>@harvest.EstimatedTons.ToString("0.0") t</strong><small>@harvest.EstimatedQuantity.ToString("0.#") @harvest.Unit</small></td>
+                                                <td><strong>@harvest.ReservedTons.ToString("0.0") t</strong><small>@harvest.ReservedQuantity.ToString("0.#") @harvest.Unit pre-order</small></td>
+                                                <td><span class="@(harvest.IsReady ? "dashboard-status-ready" : "dashboard-status-growing")">• @(harvest.IsReady ? "Ready" : "Growing")</span></td>
+                                                <td><a class="dashboard-row-action" href="@(harvest.IsReady ? $"/PlantingBatches/Harvest?id={harvest.BatchId}" : $"/PlantingBatches/Details?id={harvest.BatchId}")">@(harvest.IsReady ? "Record harvest" : "View batch") <span aria-hidden="true">→</span></a></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-card dashboard-table-card mb-4">
+                        <div class="dashboard-panel-heading dashboard-table-heading">
+                            <div>
+                                <h2>Orders to confirm</h2>
+                                <p>Respond to buyer orders so they can plan delivery.</p>
+                            </div>
+                            <a class="dashboard-view-all" href="/Farmer/Orders">View all orders <span aria-hidden="true">→</span></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table dashboard-table align-middle mb-0">
+                                <thead>
+                                    <tr><th>Order</th><th>Buyer</th><th>Crop &amp; quantity</th><th>Total RWF</th><th>Requested delivery</th><th>Action</th></tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Dashboard.PendingOrders.Count == 0)
+                                    {
+                                        <tr><td colspan="6" class="dashboard-empty">No buyer orders need confirmation right now.</td></tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var order in Model.Dashboard.PendingOrders)
+                                        {
+                                            <tr>
+                                                <td><strong>@order.OrderNumber</strong></td>
+                                                <td>@order.BuyerName</td>
+                                                <td><strong>@order.CropName</strong><small>@order.Quantity.ToString("0.#") @order.Unit</small></td>
+                                                <td><strong>@order.TotalRwf.ToString("N0")</strong></td>
+                                                <td>@(order.DeliveryDate?.ToString("dd MMM yyyy") ?? "Not set")</td>
+                                                <td><a class="dashboard-row-action" href="/Farmer/Orders?item=@order.OrderItemId">Confirm / Review <span aria-hidden="true">→</span></a></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
-                <div>
-                    <h4 class="fw-bold mb-0">Welcome back, @User.Identity?.Name</h4>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
-                        @ViewData["UserRole"] Account
-                    </span>
-                </div>
-            </div>
-            <p class="text-muted small mb-0">
-                You are signed in to AgriFlow Rwanda. Your role workspace will load here once the dashboard modules are connected.
-            </p>
+            </main>
         </div>
     </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        (() => {
+            const element = document.getElementById('supplyPipelineChart');
+            if (!element || typeof Chart === 'undefined') return;
+
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.Dashboard.SupplyWeeks.Select(week => week.Label)));
+            const reserved = @Html.Raw(JsonSerializer.Serialize(Model.Dashboard.SupplyWeeks.Select(week => week.ReservedTons)));
+            const open = @Html.Raw(JsonSerializer.Serialize(Model.Dashboard.SupplyWeeks.Select(week => week.OpenTons)));
+            const totalLabels = {
+                id: 'supplyTotalLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx, scales: { x, y } } = chart;
+                    ctx.save();
+                    ctx.font = '600 11px system-ui, sans-serif';
+                    ctx.fillStyle = '#475569';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    labels.forEach((_, index) => {
+                        const total = Number(reserved[index]) + Number(open[index]);
+                        if (total <= 0) return;
+                        const top = Math.min(y.getPixelForValue(total), y.top + 13);
+                        ctx.fillText(`${total.toFixed(1)} t`, x.getPixelForValue(index), top - 4);
+                    });
+                    ctx.restore();
+                }
+            };
+
+            new Chart(element, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Reserved', data: reserved, backgroundColor: '#1B5E3A', borderRadius: 5, borderSkipped: false, stack: 'supply' },
+                        { label: 'Still open', data: open, backgroundColor: '#B7E4C7', borderRadius: 5, borderSkipped: false, stack: 'supply' }
+                    ]
+                },
+                plugins: [totalLabels],
+                options: {
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 20 } },
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: context => `${context.dataset.label}: ${Number(context.raw).toFixed(1)} t` } }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: '#64748B', font: { size: 11 } } },
+                        y: { stacked: true, beginAtZero: true, border: { display: false }, grid: { color: '#E8EEEA' }, ticks: { color: '#64748B', precision: 1, callback: value => `${value} t` } }
+                    }
+                }
+            });
+        })();
+    </script>
+}
+else
+{
+    <div class="py-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: #eef7f1; color: #1b653c;">
+                        <i class="bi bi-sprout fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Welcome back, @User.Identity?.Name</h4>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">@Model.UserRole Account</span>
+                    </div>
+                </div>
+                <p class="text-muted small mb-0">You are signed in to AgriFlow Rwanda. Your role workspace will load here once the dashboard modules are connected.</p>
+            </div>
+        </div>
+    </div>
+}
