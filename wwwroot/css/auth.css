@@ -1,0 +1,319 @@
+﻿:root {
+    --af-green-dark: #165432;
+    --af-green-primary: #1b653c;
+    --af-green-hover: #144d2e;
+    --af-green-soft: #eef7f1;
+    --af-green-border: #227848;
+    --af-blue-soft: #eef4fc;
+    --af-blue-border: #c5d9f6;
+    --af-text-muted: #6c757d;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #ffffff;
+    color: #1a1f24;
+}
+
+.auth-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Left Sidebar */
+.auth-sidebar {
+    width: 420px;
+    flex-shrink: 0;
+    background-color: var(--af-green-dark);
+    color: #ffffff;
+    padding: 2.5rem 2.75rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.brand-logo {
+    color: #ffffff;
+}
+
+.sidebar-title {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.sidebar-subtitle {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #b7ebd0;
+    font-size: 1.1rem;
+}
+
+.feature-desc {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.sidebar-footer {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+/* Right Main Content */
+.auth-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    overflow-y: auto;
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 620px;
+}
+
+.section-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--af-green-primary);
+    margin-bottom: 0.85rem;
+}
+
+/* Role Selector Cards */
+.role-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border: 1.5px solid #dee2e6;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    background-color: #ffffff;
+    transition: all 0.15s ease-in-out;
+}
+
+    .role-card:hover {
+        border-color: var(--af-green-border);
+        background-color: #fafdfb;
+    }
+
+    .role-card.active {
+        border-color: var(--af-green-border);
+        background-color: var(--af-green-soft);
+    }
+
+.role-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background-color: #f1f3f5;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+.role-card.active .role-card-icon {
+    background-color: #d6eedf;
+    color: var(--af-green-primary);
+}
+
+.role-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #ced4da;
+    display: inline-block;
+    position: relative;
+}
+
+.role-card.active .role-radio {
+    border-color: var(--af-green-primary);
+    background-color: var(--af-green-primary);
+}
+
+    .role-card.active .role-radio::after {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ffffff;
+        position: absolute;
+        top: 4px;
+        left: 4px;
+    }
+
+/* Form Controls */
+.form-label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.35rem;
+}
+
+.required-star {
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border-color: #dee2e6;
+    padding: 0.58rem 0.8rem;
+    font-size: 0.92rem;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--af-green-border);
+        box-shadow: 0 0 0 0.2rem rgba(27, 101, 60, 0.15);
+    }
+
+.input-group-text {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+    color: #6c757d;
+    border-radius: 8px;
+}
+
+.form-hint {
+    font-size: 0.78rem;
+    color: var(--af-text-muted);
+    margin-top: 0.3rem;
+}
+
+/* Buttons & Callouts */
+.btn-agriflow {
+    background-color: var(--af-green-primary);
+    border-color: var(--af-green-primary);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+}
+
+    .btn-agriflow:hover {
+        background-color: var(--af-green-hover);
+        border-color: var(--af-green-hover);
+        color: #ffffff;
+    }
+
+.callout-green {
+    background-color: var(--af-green-soft);
+    border: 1px solid #cce7d6;
+    border-radius: 10px;
+    padding: 0.95rem 1.1rem;
+    font-size: 0.84rem;
+    color: #16472b;
+}
+
+.callout-blue {
+    background-color: var(--af-blue-soft);
+    border: 1px solid var(--af-blue-border);
+    border-radius: 10px;
+    padding: 0.95rem 1.1rem;
+    font-size: 0.84rem;
+    color: #1c3d6e;
+}
+
+
+
+
+/* Pending Verification Timeline & Badges (Screens A4 & A5) */
+.status-hero-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #fef6e6;
+    color: #9a6700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.timeline-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+    background-color: #ffffff;
+}
+
+.timeline-step {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.85rem;
+    position: relative;
+    padding-bottom: 1.15rem;
+}
+
+    .timeline-step:last-child {
+        padding-bottom: 0;
+    }
+
+    .timeline-step:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: 12px;
+        top: 28px;
+        bottom: 2px;
+        width: 1.5px;
+        background-color: #e5e7eb;
+    }
+
+.step-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+    .step-dot.done {
+        background-color: var(--af-green-primary);
+        color: #ffffff;
+    }
+
+    .step-dot.current {
+        background-color: #fef6e6;
+        color: #9a6700;
+        border: 1px solid #f5dfa8;
+    }
+
+    .step-dot.upcoming {
+        background-color: #e9ecef;
+    }
+
+.badge-in-review {
+    background-color: #fef6e6;
+    color: #8a5a00;
+    border: 1px solid #f5dfa8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}

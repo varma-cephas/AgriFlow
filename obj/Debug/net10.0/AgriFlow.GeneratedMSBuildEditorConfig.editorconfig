@@ -23,16 +23,56 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/PendingBusiness.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxQZW5kaW5nQnVzaW5lc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/PendingFarmer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxQZW5kaW5nRmFybWVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/RegisterBusiness.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxSZWdpc3RlckJ1c2luZXNzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Account/RegisterFarmer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxSZWdpc3RlckZhcm1lci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Buyer/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnV5ZXJcRGFzaGJvYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Buyer/EditProfile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnV5ZXJcRWRpdFByb2ZpbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/varma/source/repos/AgriFlow/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Farmer/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmFybWVyXERhc2hib2FyZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/varma/source/repos/AgriFlow/Pages/Farmer/EditFarmer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmFybWVyXEVkaXRGYXJtZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/varma/source/repos/AgriFlow/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/varma/source/repos/AgriFlow/Pages/Privacy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
+[C:/Users/varma/source/repos/AgriFlow/Pages/Shared/_AuthLayout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9BdXRoTGF5b3V0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/varma/source/repos/AgriFlow/Pages/Shared/_ValidationScriptsPartial.cshtml]
