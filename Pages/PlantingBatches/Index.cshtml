@@ -1,0 +1,107 @@
+@page
+@using System.Globalization
+@model AgriFlow.Pages.PlantingBatches.IndexModel
+@{
+    ViewData["Title"] = "Planting batches";
+}
+
+<div class="planting-workspace planting-page">
+    <div class="planting-page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="planting-title-icon" aria-hidden="true"><i class="bi bi-tree"></i></div>
+            <div>
+                <h1 class="h3 fw-bold mb-1">Ongoing batches</h1>
+                <p class="text-muted mb-0">See what's growing and when each batch will be ready.</p>
+            </div>
+        </div>
+        <a asp-page="/PlantingBatches/Create" class="btn planting-primary px-3 py-2">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Record planting
+        </a>
+    </div>
+
+    @if (Model.LoadFailed)
+    {
+        <section class="planting-card planting-empty-state text-center p-4 p-md-5" aria-labelledby="batchesUnavailableTitle">
+            <div class="planting-empty-icon mx-auto mb-3" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></div>
+            <h2 id="batchesUnavailableTitle" class="h5 fw-bold mb-2">Batches are temporarily unavailable</h2>
+            <p class="text-muted mb-0">Please refresh the page to try again.</p>
+        </section>
+    }
+    else if (Model.Batches.Count == 0)
+    {
+        <section class="planting-card planting-empty-state text-center p-4 p-md-5" aria-labelledby="emptyBatchesTitle">
+            <div class="planting-empty-icon mx-auto mb-3" aria-hidden="true"><i class="bi bi-seedling"></i></div>
+            <h2 id="emptyBatchesTitle" class="h5 fw-bold mb-2">No ongoing batches yet</h2>
+            <p class="text-muted mb-4">Record a planting to start tracking crop growth and harvest dates.</p>
+            <a asp-page="/PlantingBatches/Create" class="btn planting-primary px-3 py-2">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Record planting
+            </a>
+        </section>
+    }
+    else
+    {
+        <section class="planting-card overflow-hidden" aria-label="Active planting batches">
+            <div class="planting-card-header d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 p-md-4">
+                <div>
+                    <h2 class="h5 fw-bold mb-1">Active batches</h2>
+                    <p class="text-muted small mb-0">@Model.Batches.Count batch@(Model.Batches.Count == 1 ? "" : "es") growing</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table planting-batches-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Crop</th>
+                            <th scope="col">Quantity planted</th>
+                            <th scope="col">Planting date</th>
+                            <th scope="col">Predicted harvest</th>
+                            <th scope="col">Days remaining / status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var batch in Model.Batches)
+                        {
+                            var daysUntilHarvest = batch.PredictedHarvestDate.DayNumber - Model.Today.DayNumber;
+                            var isReady = daysUntilHarvest <= 0;
+                            <tr class="@(isReady ? "planting-ready-row" : "")">
+                                <td>
+                                    <div class="fw-semibold">@batch.CropName <span class="text-muted fw-normal">· @batch.Variety</span></div>
+                                    <div class="text-muted small">@batch.BatchCode@if (!string.IsNullOrWhiteSpace(batch.FieldName)){<text> · @batch.FieldName</text>}</div>
+                                </td>
+                                <td class="text-nowrap">@batch.QuantityPlanted.ToString("0.##", CultureInfo.InvariantCulture) @batch.Unit</td>
+                                <td class="text-nowrap">@batch.PlantingDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)</td>
+                                <td class="text-nowrap">@batch.PredictedHarvestDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)</td>
+                                <td>
+                                    @if (isReady)
+                                    {
+                                        <span class="planting-ready-badge">Ready to harvest</span>
+                                        <div class="small fw-semibold mt-1 @(daysUntilHarvest < 0 ? "text-warning-emphasis" : "text-muted")">
+                                            @(daysUntilHarvest < 0 ? $"Overdue by {-daysUntilHarvest} day{(daysUntilHarvest == -1 ? "" : "s")}" : "0 days")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="planting-upcoming">@daysUntilHarvest day@(daysUntilHarvest == 1 ? "" : "s") remaining</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (batch.Status == "Active" && isReady)
+                                    {
+                                        <a asp-page="/PlantingBatches/RecordHarvest" asp-route-batchId="@batch.Id" class="btn btn-success btn-sm text-nowrap">
+                                            Record Harvest
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Growing</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+</div>

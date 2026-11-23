@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isFarmWorkspace = User.IsInRole("Farmer") || User.IsInRole("Agent");
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,10 +12,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
+<body class="@(isFarmWorkspace ? "planting-workspace" : "bg-light")">
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #165432;">
-            <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark workspace-navbar">
+            <div class="container-fluid px-3 px-lg-4">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-page="/Index">
                     <i class="bi bi-sprout"></i> AgriFlow
                 </a>
@@ -28,11 +32,38 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="py-4">
-            @RenderBody()
-        </main>
-    </div>
+    @if (isFarmWorkspace)
+    {
+        <div class="workspace-shell">
+            <aside class="workspace-sidebar" aria-label="Farm workspace navigation">
+                <div class="workspace-sidebar-label">FARM WORKSPACE</div>
+                @if (User.IsInRole("Farmer"))
+                {
+                    <a asp-page="/Farmer/Dashboard" class="workspace-sidebar-link @(currentPage == "/Farmer/Dashboard" ? "active" : "")">
+                        <i class="bi bi-house-door" aria-hidden="true"></i> Dashboard
+                    </a>
+                }
+                <a asp-page="/PlantingBatches/Index" class="workspace-sidebar-link @(currentPage == "/PlantingBatches/Index" ? "active" : "")">
+                    <i class="bi bi-tree" aria-hidden="true"></i> Planting batches
+                </a>
+            </aside>
+            <div class="workspace-main">
+                <main role="main" class="workspace-content py-4">
+                    <partial name="_ToastPartial" />
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="container">
+            <main role="main" class="py-4">
+                <partial name="_ToastPartial" />
+                @RenderBody()
+            </main>
+        </div>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
