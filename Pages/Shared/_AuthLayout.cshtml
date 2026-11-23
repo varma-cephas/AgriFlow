@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AgriFlow Rwanda</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-wrapper">
+        <!-- Left Green Branding Panel -->
+        <aside class="auth-sidebar d-none d-lg-flex flex-column justify-content-between">
+            <div>
+                <a asp-page="/Index" class="brand-logo text-decoration-none d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-sprout fs-4"></i>
+                    <span class="fw-bold fs-5">AgriFlow</span>
+                </a>
+
+                <div class="mt-5 pt-3">
+                    <h1 class="sidebar-title">
+    @(ViewData["SidebarTitle"] ?? "Sell your harvest before you harvest it.")
+</h1>
+                    <p class="sidebar-subtitle mt-3">
+                        Farmers sell harvests in bulk, even before they are harvested. Verified businesses get reliable, traceable supply direct from the farm.
+                    </p>
+
+                    <div class="feature-list mt-5 d-flex flex-column gap-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="feature-icon"><i class="bi bi-sprout"></i></div>
+                            <div>
+                                <div class="fw-semibold text-white">For farmers</div>
+                                <div class="feature-desc">Record seed, plantings and harvests. Get buyers before you harvest.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="feature-icon"><i class="bi bi-building"></i></div>
+                            <div>
+                                <div class="fw-semibold text-white">For businesses</div>
+                                <div class="feature-desc">Supermarkets, hotels, schools and processors buy in bulk.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="feature-icon"><i class="bi bi-check-circle"></i></div>
+                            <div>
+                                <div class="fw-semibold text-white">Verified on both sides</div>
+                                <div class="feature-desc">Every buyer business is checked before it can order.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                &copy; 2026 AgriFlow &middot; Rwanda
+            </div>
+        </aside>
+
+        <!-- Right Form Panel -->
+        <main class="auth-main">
+            <div class="auth-form-container">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
