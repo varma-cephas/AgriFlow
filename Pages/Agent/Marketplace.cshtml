@@ -1,0 +1,11 @@
+@page
+@model AgriFlow.Pages.Agent.MarketplaceModel
+@{ Layout = "_AgentLayout"; ViewData["Title"] = "Marketplace"; }
+<div class="agent-page">
+    <div class="agent-heading"><div><div class="agent-eyebrow">AGRI MARKETPLACE</div><h1>Marketplace</h1><p>Monitor active produce listings published by farmers across AgriFlow.</p></div><span class="agent-pill"><i class="bi bi-shop me-1"></i>@Model.Listings.Count active listings</span></div>
+    <div class="agent-card">
+        <div class="d-flex justify-content-between align-items-center mb-3"><div><h5>Available produce</h5><p>Use this view to help farmers understand current market supply.</p></div><a asp-page="/Agent/MyFarmers" class="btn btn-outline-success btn-sm"><i class="bi bi-people me-1"></i> My farmers</a></div>
+        @if (!Model.Listings.Any()) { <div class="agent-empty"><i class="bi bi-shop fs-2"></i><p class="fw-semibold mb-1">No active listings</p><p class="small mb-0">Listings will appear here when farmers publish available produce.</p></div> }
+        else { <div class="row g-3">@foreach (var item in Model.Listings) { <div class="col-md-6 col-xl-4"><article class="agent-market-card"><div class="agent-market-icon">@item.CropName.Substring(0, 1).ToUpperInvariant()</div><div class="d-flex justify-content-between align-items-start gap-2"><h5>@item.CropName</h5><span class="agent-pill">Open</span></div><p class="agent-market-meta"><i class="bi bi-person"></i> @item.FarmerName<br /><i class="bi bi-geo-alt"></i> @item.FarmName</p><div class="agent-market-price">RWF @item.PricePerUnit.ToString("N0") <small>/ @item.Unit</small></div><div class="agent-market-quantity"><span>Available</span><strong>@item.AvailableQuantity.ToString("0.##") @item.Unit</strong></div><small class="text-muted">Listed @item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</small></article></div> }</div> }
+    </div>
+</div>

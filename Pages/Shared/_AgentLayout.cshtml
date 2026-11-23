@@ -26,7 +26,7 @@
                 <a asp-page="/Account/RegisterFarmer" class="@(Context.Request.Path.StartsWithSegments("/Account/RegisterFarmer") ? "active" : "")">
                     <i class="bi bi-person-plus"></i> Register farmer
                 </a>
-                <a asp-page="/Buyer/Dashboard">
+                <a asp-page="/Agent/Marketplace" class="@(Context.Request.Path.StartsWithSegments("/Agent/Marketplace") ? "active" : "")">
                     <i class="bi bi-shop"></i> Marketplace
                 </a>
             </nav>
@@ -40,7 +40,7 @@
         </aside>
         <main class="agent-content">
             <header class="agent-topbar">
-                <span class="text-muted small">Agent workspace&nbsp; / &nbsp;Overview</span>
+                <span class="text-muted small">Agent workspace&nbsp; / &nbsp;@ViewData["Title"]</span>
                 <div class="d-flex align-items-center gap-3">
                     <div class="agent-search"><i class="bi bi-search"></i> Search...</div>
                     <i class="bi bi-bell text-muted"></i>

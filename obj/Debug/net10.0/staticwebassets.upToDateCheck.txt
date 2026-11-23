@@ -1,4 +1,5 @@
 wwwroot\css\auth.css
+wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\js\rwanda-locations.js
 wwwroot\js\site.js
@@ -62,8 +63,8 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\css\site.css
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\css\auth.css
+D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\css\site.css
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\favicon.ico
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\js\rwanda-locations.js
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\js\site.js
@@ -126,4 +127,3 @@ D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\lib\jquery\dist\jquery.slim.js
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\lib\jquery\dist\jquery.slim.min.js
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\lib\jquery\dist\jquery.slim.min.map
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\lib\jquery\LICENSE.txt
-D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\wwwroot\css\site.css

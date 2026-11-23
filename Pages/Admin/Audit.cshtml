@@ -1,0 +1,7 @@
+@page
+@model AgriFlow.Pages.Admin.AuditModel
+@{ Layout = "_AdminLayout"; ViewData["Title"] = "Audit log"; ViewData["Section"] = "Audit log"; }
+<div class="admin-page">
+    <div class="admin-heading"><div><div class="admin-eyebrow">GOVERNANCE</div><h1>Audit log</h1><p>Review important actions performed across the AgriFlow platform.</p></div></div>
+    <div class="admin-card"><div class="admin-card-header"><div><h3>Recent activity</h3><span>Showing the latest @Model.Entries.Count audit event(s)</span></div><i class="bi bi-file-earmark-text admin-card-icon"></i></div>@if (!Model.Entries.Any()) { <div class="admin-empty"><i class="bi bi-journal-check"></i><h5>No audit events yet</h5><p>Administrative and account activity will appear here.</p></div> } else { <div class="table-responsive"><table class="table admin-table"><thead><tr><th>Date</th><th>Actor</th><th>Entity</th><th>Action</th><th>Summary</th><th>Result</th></tr></thead><tbody>@foreach (var item in Model.Entries) { <tr><td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td><td>@item.Actor</td><td>@item.Entity</td><td><strong>@item.Action</strong></td><td>@item.Summary</td><td><span class="badge bg-light text-dark">@item.Result</span></td></tr>}</tbody></table></div> }</div>
+</div>

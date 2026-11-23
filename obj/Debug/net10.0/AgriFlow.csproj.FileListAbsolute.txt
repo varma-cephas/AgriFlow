@@ -193,6 +193,7 @@ D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\scopedcss\Pages\Shared\_L
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\scopedcss\bundle\AgriFlow.styles.css
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\scopedcss\projectbundle\AgriFlow.bundle.scp.css
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\rbrvqeiava-{0}-4lk3fbhdq0-4lk3fbhdq0.gz
+D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\p2wgfhsfsh-{0}-x68ff0b9my-x68ff0b9my.gz
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\gsen6k3qsq-{0}-61n19gt1b8-61n19gt1b8.gz
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\e5bdl2spnb-{0}-ofamt9lwg5-ofamt9lwg5.gz
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\dt0fka199y-{0}-rcivv63fp5-rcivv63fp5.gz
@@ -269,4 +270,3 @@ D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\refint\AgriFlow.dll
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\AgriFlow.pdb
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\AgriFlow.genruntimeconfig.cache
 D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\ref\AgriFlow.dll
-D:\AUCA-PROJECT\DOT-NET PRO\AgriFlow\obj\Debug\net10.0\compressed\p2wgfhsfsh-{0}-kcmprmicnr-kcmprmicnr.gz

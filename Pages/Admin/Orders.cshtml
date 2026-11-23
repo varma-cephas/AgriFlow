@@ -1,0 +1,7 @@
+@page
+@model AgriFlow.Pages.Admin.OrdersModel
+@{ Layout = "_AdminLayout"; ViewData["Title"] = "Orders & disputes"; ViewData["Section"] = "Orders & disputes"; }
+<div class="admin-page">
+    <div class="admin-heading"><div><div class="admin-eyebrow">MARKETPLACE OPERATIONS</div><h1>Orders &amp; disputes</h1><p>Monitor marketplace orders and identify transactions that need attention.</p></div></div>
+    <div class="admin-card"><div class="admin-card-header"><div><h3>Marketplace orders</h3><span>@Model.Orders.Count order line(s)</span></div><i class="bi bi-cart-check admin-card-icon"></i></div>@if (!Model.Orders.Any()) { <div class="admin-empty"><i class="bi bi-cart"></i><h5>No orders yet</h5><p>Buyer orders will appear here after the first purchase.</p></div> } else { <div class="table-responsive"><table class="table admin-table"><thead><tr><th>Order</th><th>Produce</th><th>Buyer</th><th>Farmer</th><th>Quantity</th><th>Total</th><th>Status</th></tr></thead><tbody>@foreach (var item in Model.Orders) { <tr><td><strong>#@item.Id</strong><small>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</small></td><td>@item.CropName</td><td>@item.BuyerName</td><td>@item.FarmerName</td><td>@item.Quantity.ToString("0.##")</td><td>RWF @item.Total.ToString("N0")</td><td><span class="badge bg-light text-dark">@item.Status</span></td></tr>}</tbody></table></div> }</div>
+</div>
