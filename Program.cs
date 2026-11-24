@@ -9,6 +9,7 @@ builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddSingleton<NationalIdProtector>();
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<MarketplaceRepository>();
+builder.Services.AddScoped<OrderRepository>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
