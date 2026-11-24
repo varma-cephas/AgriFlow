@@ -1,10 +1,18 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Dashboard";
+    ViewData["Breadcrumb"] = "Workspace / Overview";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<partial name="_PageHeader" model='new PageHeaderModel {
+    Icon = "bi-flower1",
+    Title = "Welcome back, " + User.Identity?.Name,
+    Subtitle = "You are signed in to AgriFlow Rwanda." }' />
+
+<div class="af-card">
+    <span class="af-badge af-badge-green mb-3">@ViewData["UserRole"] account</span>
+    <p class="af-muted mb-0">
+        Your role workspace will load here once the dashboard modules are connected.
+    </p>
 </div>
