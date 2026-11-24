@@ -1,53 +1,18 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Dashboard";
+    ViewData["Breadcrumb"] = "Workspace / Overview";
 }
 
-<div class="py-4">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-3 d-flex align-items-center justify-content-center"
-                     style="width: 44px; height: 44px; background-color: #eef7f1; color: #1b653c;">
-                    <i class="bi bi-sprout fs-4"></i>
-                </div>
-                <div>
-                    <h4 class="fw-bold mb-0">Welcome back, @User.Identity?.Name</h4>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
-                        @ViewData["UserRole"] Account
-                    </span>
-                </div>
-            </div>
-            <p class="text-muted small mb-0">
-                You are signed in to AgriFlow Rwanda. Your role workspace will load here once the dashboard modules are connected.
-            </p>
-        </div>
-    </div>
+<partial name="_PageHeader" model='new PageHeaderModel {
+    Icon = "bi-flower1",
+    Title = "Welcome back, " + User.Identity?.Name,
+    Subtitle = "You are signed in to AgriFlow Rwanda." }' />
 
-    <section class="card border-0 shadow-sm mt-4" aria-labelledby="lowStockTitle">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start gap-3">
-                <div>
-                    <h2 class="h5 fw-bold mb-1" id="lowStockTitle">Low-stock items</h2>
-                    @if (Model.LowStockCount.HasValue)
-                    {
-                        <p class="text-muted small mb-0">Inventory items with quantity less than or equal to 10 in your authorized scope.</p>
-                    }
-                </div>
-                @if (Model.LowStockCount.HasValue)
-                {
-                    <span class="badge bg-danger fs-5">@Model.LowStockCount.Value</span>
-                }
-            </div>
-            @if (Model.LowStockCount.HasValue)
-            {
-                <a asp-page="/SeedStock/Index" class="btn btn-outline-success btn-sm mt-3">View seed stock</a>
-            }
-            else
-            {
-                <p class="text-muted small mt-2 mb-0">@Model.SummaryMessage</p>
-            }
-        </div>
-    </section>
+<div class="af-card">
+    <span class="af-badge af-badge-green mb-3">@ViewData["UserRole"] account</span>
+    <p class="af-muted mb-0">
+        Your role workspace will load here once the dashboard modules are connected.
+    </p>
 </div>

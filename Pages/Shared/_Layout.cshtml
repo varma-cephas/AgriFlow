@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,34 +6,14 @@
     <title>@ViewData["Title"] - AgriFlow</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/agriflow.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #165432;">
-            <div class="container">
-                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-page="/Index">
-                    <i class="bi bi-sprout"></i> AgriFlow
-                </a>
-                <div class="ms-auto d-flex align-items-center gap-3 text-white small">
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        @if (User.IsInRole("Farmer") || User.IsInRole("Agent") || User.IsInRole("Admin"))
-                        {
-                            <a asp-page="/SeedStock/Index" class="link-light">Seed stock</a>
-                        }
-                        <span>@User.Identity.Name</span>
-                        <form method="post" asp-page="/Account/Logout" class="m-0">
-                            <button type="submit" class="btn btn-outline-light btn-sm">Sign out</button>
-                        </form>
-                    }
-                </div>
-            </div>
-        </nav>
-    </header>
+<body class="af-body">
+    <partial name="_Sidebar" />
 
-    <div class="container">
-        <main role="main" class="py-4">
+    <div class="af-main">
+        <partial name="_TopBar" />
+        <main role="main" class="af-page">
             @RenderBody()
         </main>
     </div>
