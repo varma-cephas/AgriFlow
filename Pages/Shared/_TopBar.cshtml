@@ -1,0 +1,21 @@
+@{
+    var crumb = ViewData["Breadcrumb"] as string ?? "Workspace / Overview";
+    var parts = crumb.Split('/', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+}
+<header class="af-topbar">
+    <nav class="af-breadcrumb" aria-label="Breadcrumb">
+        @for (var i = 0; i < parts.Length; i++)
+        {
+            if (i > 0) { <span class="sep">/</span> }
+            <span class="@(i == parts.Length - 1 ? "current" : "")">@parts[i]</span>
+        }
+    </nav>
+    <div class="af-topbar-right">
+        <div class="af-search">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control" placeholder="Search..." aria-label="Search" />
+        </div>
+        <span class="af-bell" role="img" aria-label="Notifications"><i class="bi bi-bell"></i><span class="dot"></span></span>
+        <span class="af-date">@DateTime.Now.ToString("ddd, d MMM yyyy")</span>
+    </div>
+</header>
