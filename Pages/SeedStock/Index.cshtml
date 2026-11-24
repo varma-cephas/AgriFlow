@@ -61,7 +61,18 @@
                 <td>@row.MaturityDays days</td>
                 <td>@(string.IsNullOrWhiteSpace(row.Supplier) ? "—" : row.Supplier)</td>
                 <td>@row.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
-                <td><a asp-page="./Edit" asp-route-id="@row.Id" class="btn btn-sm btn-outline-primary">Edit</a></td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@row.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                    @if (Model.CanDelete)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#deleteSeedStockModal"
+                                data-seed-stock-id="@row.Id"
+                                data-seed-stock-name="@row.CropName — @row.Variety">
+                            Delete
+                        </button>
+                    }
+                </td>
             </tr>
         }
         @if (!Model.StockRows.Any())
@@ -71,3 +82,41 @@
         </tbody>
     </table>
 </div>
+
+@if (Model.CanDelete)
+{
+    <div class="modal fade" id="deleteSeedStockModal" tabindex="-1" aria-labelledby="deleteSeedStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Delete">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="deleteSeedStockModalLabel">Delete seed stock?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete <strong id="deleteSeedStockName"></strong>?</p>
+                        <p class="mb-0">This action cannot be undone.</p>
+                        <input type="hidden" name="id" id="deleteSeedStockId" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        const deleteSeedStockModal = document.getElementById('deleteSeedStockModal');
+        if (deleteSeedStockModal) {
+            deleteSeedStockModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                document.getElementById('deleteSeedStockId').value = button.getAttribute('data-seed-stock-id');
+                document.getElementById('deleteSeedStockName').textContent = button.getAttribute('data-seed-stock-name');
+            });
+        }
+    </script>
+}
