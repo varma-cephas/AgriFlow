@@ -1,0 +1,239 @@
+﻿@page
+@model AgriFlow.Pages.Buyer.ListingDetailsModel
+@{
+    var l = Model.Listing;
+    ViewData["Title"] = l.CropName + " listing";
+}
+
+<a asp-page="/Buyer/Marketplace" class="small text-decoration-none">
+    <i class="bi bi-arrow-left me-1"></i> Back to marketplace
+</a>
+
+<div class="row g-4 mt-1">
+    <!-- ================= LEFT: the listing ================= -->
+    <div class="col-lg-8">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <h2 class="fw-bold mb-0">@l.CropName</h2>
+            @if (Model.IsSoldOut)
+            {
+                <span class="badge bg-secondary">Sold out</span>
+            }
+            else
+            {
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Available now</span>
+            }
+            <span class="badge bg-light text-dark border">Grade @l.Grade</span>
+            <span class="badge bg-light text-dark border"><i class="bi bi-patch-check me-1"></i>Verified farm</span>
+        </div>
+        <p class="text-muted mb-3"><i class="bi bi-geo-alt me-1"></i>@l.FarmName &middot; @l.District, @l.Province</p>
+
+        @if (!string.IsNullOrWhiteSpace(l.Description))
+        {
+            <p class="mb-4">@l.Description</p>
+        }
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">About this harvest</h6>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-4 text-muted fw-normal">Farm</dt>
+                    <dd class="col-sm-8">@l.FarmName</dd>
+                    <dt class="col-sm-4 text-muted fw-normal">Region</dt>
+                    <dd class="col-sm-8">@l.District, @l.Province</dd>
+                    <dt class="col-sm-4 text-muted fw-normal">Listing / batch</dt>
+                    <dd class="col-sm-8">@l.ListingCode / @l.BatchCode</dd>
+                    <dt class="col-sm-4 text-muted fw-normal">Unit</dt>
+                    <dd class="col-sm-8">@Model.UnitLabel()</dd>
+                    <dt class="col-sm-4 text-muted fw-normal">Harvested</dt>
+                    <dd class="col-sm-8">@(l.HarvestDate.HasValue ? Model.FormatDate(l.HarvestDate.Value) : "-")</dd>
+                    <dt class="col-sm-4 text-muted fw-normal">Remaining</dt>
+                    <dd class="col-sm-8 fw-semibold mb-0">@Model.FormatNumber(l.AvailableQty) @Model.Plural(l.AvailableQty)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Traceability: from seed to listing</h6>
+                <div class="row g-2 text-center small">
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded-3 p-2 h-100">
+                            <i class="bi bi-box-seam fs-4 text-success"></i>
+                            <div class="fw-semibold">Seed</div>
+                            <div>@l.Variety</div>
+                            @if (!string.IsNullOrWhiteSpace(l.Supplier))
+                            {
+                                <div class="text-muted">@l.Supplier</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded-3 p-2 h-100">
+                            <i class="bi bi-flower1 fs-4 text-success"></i>
+                            <div class="fw-semibold">Planted</div>
+                            <div>@Model.FormatDate(l.PlantingDate)</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded-3 p-2 h-100">
+                            <i class="bi bi-basket fs-4 text-success"></i>
+                            <div class="fw-semibold">Harvested</div>
+                            <div>@(l.HarvestDate.HasValue ? Model.FormatDate(l.HarvestDate.Value) : "-")</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded-3 p-2 h-100">
+                            <i class="bi bi-tag fs-4 text-success"></i>
+                            <div class="fw-semibold">Listed</div>
+                            <div>@Model.FormatDate(l.ListedAt)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Farm track record</h6>
+                <div class="row text-center g-2">
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold">@l.HarvestsCompleted</div>
+                        <div class="text-muted small">Harvests recorded</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold">@l.OrdersDelivered</div>
+                        <div class="text-muted small">Orders delivered</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold">@l.FarmMemberSince.ToString("MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)</div>
+                        <div class="text-muted small">On AgriFlow since</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RIGHT: order panel ================= -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm position-sticky" style="top: 1rem;">
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="fs-3 fw-bold" style="color: #165432;">@Model.Money(l.PricePerUnit)</span>
+                    <span class="text-muted small">per @Model.UnitLabel()</span>
+                </div>
+
+                @if (Model.ErrorMessage is not null)
+                {
+                    <div class="alert alert-danger small" role="alert">@Model.ErrorMessage</div>
+                }
+
+                @if (Model.IsSoldOut)
+                {
+                    <div class="alert alert-secondary small mb-0" role="alert">This listing is sold out.</div>
+                }
+                else
+                {
+                    @if (Model.RestrictionMessage is not null)
+                    {
+                        <div class="alert alert-warning small" role="alert">@Model.RestrictionMessage</div>
+                    }
+
+                    <form method="post" asp-page="/Buyer/ListingDetails" asp-route-id="@Model.Id">
+                        <fieldset disabled="@(!Model.CanOrder)">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="Quantity">Quantity (@Model.Plural(2))</label>
+                                <input type="number" class="form-control" id="Quantity" name="Quantity"
+                                       value="@Model.Quantity" min="@Model.Attr(l.MinOrderQty)" max="@Model.Attr(l.AvailableQty)"
+                                       step="0.01" required />
+                                <div class="form-text">
+                                    Minimum @Model.FormatNumber(l.MinOrderQty), maximum @Model.FormatNumber(l.AvailableQty).
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="DeliveryDate">Delivery date</label>
+                                <input type="date" class="form-control" id="DeliveryDate" name="DeliveryDate"
+                                       value="@Model.DeliveryDate" min="@Model.MinDate" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="DeliveryAddress">Deliver to</label>
+                                <textarea class="form-control" id="DeliveryAddress" name="DeliveryAddress" rows="2"
+                                          maxlength="250" required>@Model.DeliveryAddress</textarea>
+                            </div>
+
+                            <div class="border-top pt-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="text-muted">Subtotal</span>
+                                    <span id="subtotal" class="fw-semibold">0 RWF</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">Estimated total</span>
+                                    <span id="total" class="fs-5 fw-bold" style="color: #165432;">0 RWF</span>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">
+                                    You pay only for the good produce you accept on delivery.
+                                    The farm must confirm your order within 2 days.
+                                </p>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 mt-3">Place order</button>
+                        </fieldset>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.PlacedOrderNumber is not null)
+{
+    <div class="modal fade" id="orderPlacedModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    <h4 class="fw-bold mt-2">Order placed</h4>
+                    <p class="text-muted mb-1">Your order number is</p>
+                    <div class="fs-3 fw-bold mb-3">@Model.PlacedOrderNumber</div>
+                    <p class="small text-muted">
+                        Total @Model.PlacedTotal from @Model.PlacedFarm.
+                        The farm must confirm within 2 days (by @Model.PlacedConfirmBy).
+                        You can still cancel until the farm confirms.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a asp-page="/Buyer/Marketplace" class="btn btn-success">Back to marketplace</a>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Stay on this page</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var price = @Model.PriceJs;
+            var qty = document.getElementById('Quantity');
+            var subtotal = document.getElementById('subtotal');
+            var total = document.getElementById('total');
+
+            function format(n) { return Math.round(n).toLocaleString('en-US') + ' RWF'; }
+
+            function update() {
+                if (!qty || !subtotal || !total) { return; }
+                var q = parseFloat(qty.value);
+                var value = isNaN(q) ? 0 : q * price;
+                subtotal.textContent = format(value);
+                total.textContent = format(value);
+            }
+
+            if (qty) { qty.addEventListener('input', update); }
+            update();
+
+            var modalEl = document.getElementById('orderPlacedModal');
+            if (modalEl) { new bootstrap.Modal(modalEl).show(); }
+        })();
+    </script>
+}
