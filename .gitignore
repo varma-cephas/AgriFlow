@@ -1,1 +1,9 @@
-﻿.vs/
+﻿# Visual Studio
+.vs/
+*.suo
+*.user
+*.csproj.user
+
+# .NET generated files
+bin/
+obj/
