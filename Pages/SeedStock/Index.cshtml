@@ -1,0 +1,73 @@
+@page
+@model AgriFlow.Pages.SeedStock.IndexModel
+@{
+    ViewData["Title"] = "Seed stock";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-1">Seed stock</h1>
+        <div class="text-muted">Active farmer/farm: @Model.ActiveFarmerName</div>
+    </div>
+    @if (Model.ActiveFarmerId.HasValue)
+    {
+        <a class="btn btn-primary" asp-page="./Add">Add seed stock</a>
+    }
+</div>
+
+@if (Model.IsAgent)
+{
+    <div class="alert alert-info">Agent view: acting on behalf of an assigned farmer.</div>
+    @if (Model.AssignedFarmers.Count > 0)
+    {
+        <form method="get" class="row g-2 align-items-end mb-3">
+            <div class="col-auto">
+                <label for="farmerId" class="form-label">Assigned farmer</label>
+                <select id="farmerId" name="farmerId" class="form-select">
+                    @foreach (var farmer in Model.AssignedFarmers)
+                    {
+                        <option value="@farmer.Id" selected="@(Model.ActiveFarmerId == farmer.Id)">@farmer.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-auto"><button type="submit" class="btn btn-outline-primary">View farmer</button></div>
+        </form>
+    }
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-secondary">@Model.StatusMessage</div>
+}
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Crop</th>
+                <th>Available quantity</th>
+                <th>Maturity</th>
+                <th>Supplier</th>
+                <th>Last updated</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.StockRows)
+        {
+            <tr>
+                <td><strong>@row.CropName</strong><br /><span class="text-muted">@row.Variety</span></td>
+                <td>@row.Quantity.ToString("0.##") @row.Unit</td>
+                <td>@row.MaturityDays days</td>
+                <td>@(string.IsNullOrWhiteSpace(row.Supplier) ? "—" : row.Supplier)</td>
+                <td>@row.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
+                <td><a asp-page="./Edit" asp-route-id="@row.Id" class="btn btn-sm btn-outline-primary">Edit</a></td>
+            </tr>
+        }
+        @if (!Model.StockRows.Any())
+        {
+            <tr><td colspan="6" class="text-center text-muted">No seed stock found.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
