@@ -1,0 +1,259 @@
+﻿@page
+@model AgriFlow.Pages.Farmer.RecordHarvestModel
+@{
+    var b = Model.Batch;
+    ViewData["Title"] = "Record harvest";
+}
+
+<a asp-page="/Farmer/Dashboard" class="small text-decoration-none">
+    <i class="bi bi-arrow-left me-1"></i> Back to dashboard
+</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mt-2 mb-3">
+    <div>
+        <h3 class="fw-bold mb-1">Record harvest</h3>
+        <p class="text-muted small mb-0">
+            @b.CropName &middot; Batch @b.BatchCode &middot; planted @Model.FormatDate(b.PlantingDate)
+            &middot; expected @Model.FormatDate(b.PredictedHarvestDate)
+        </p>
+    </div>
+    @if (b.Status == "Harvested")
+    {
+        <span class="badge bg-success-subtle text-success border border-success-subtle">Harvested</span>
+    }
+    else
+    {
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Active</span>
+    }
+</div>
+
+@if (Model.StatusMessage is not null)
+{
+    <div class="alert alert-success d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-check-circle"></i>
+        <div>@Model.StatusMessage</div>
+    </div>
+}
+
+@if (Model.FormError is not null)
+{
+    <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <div>@Model.FormError</div>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        @if (b.Status == "Harvested")
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Harvest recorded</h6>
+                    <dl class="row small mb-0">
+                        <dt class="col-sm-5 text-muted fw-normal">Actual yield</dt>
+                        <dd class="col-sm-7">@Model.FormatNumber(b.ActualYield ?? 0) @Model.UnitPlural(b.ActualYield ?? 0)</dd>
+                        <dt class="col-sm-5 text-muted fw-normal">Harvest date</dt>
+                        <dd class="col-sm-7">@(b.HarvestDate.HasValue ? Model.FormatDate(b.HarvestDate.Value) : "-")</dd>
+                        <dt class="col-sm-5 text-muted fw-normal">Grade</dt>
+                        <dd class="col-sm-7">@b.Grade</dd>
+                        <dt class="col-sm-5 text-muted fw-normal">Listing</dt>
+                        <dd class="col-sm-7 mb-0">@b.ListingCode</dd>
+                    </dl>
+                </div>
+            </div>
+        }
+        else if (!b.ListingId.HasValue)
+        {
+            <div class="alert alert-warning small mb-0" role="alert">
+                This batch has no listing yet, so a harvest cannot be recorded.
+            </div>
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="post" asp-page="/Farmer/RecordHarvest" asp-route-batchId="@Model.BatchId" id="harvestForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="ActualYield">Actual yield</label>
+                            <input type="number" class="form-control" id="ActualYield" name="ActualYield"
+                                   value="@Model.ActualYield" min="0.01" step="0.01" required />
+                            <div class="form-text">How much you really harvested, in the selling unit below.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="HarvestDate">Harvest date</label>
+                            <input type="date" class="form-control" id="HarvestDate" name="HarvestDate"
+                                   value="@Model.HarvestDate" min="@Model.MinDate" max="@Model.Today" required />
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" for="Unit">Selling unit</label>
+                                @if (Model.HasReservations)
+                                {
+                                    <input type="text" class="form-control" value="@b.Unit" readonly />
+                                    <input type="hidden" id="Unit" name="Unit" value="@b.Unit" />
+                                }
+                                else
+                                {
+                                    <select class="form-select" id="Unit" name="Unit">
+                                        @foreach (var u in new[] { "crate", "bag", "tonne" })
+                                        {
+                                            <option value="@u" selected="@(Model.Unit == u)">@u</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" for="Grade">Grade</label>
+                                <select class="form-select" id="Grade" name="Grade">
+                                    @foreach (var g in new[] { "A", "B", "C" })
+                                    {
+                                        <option value="@g" selected="@(Model.Grade == g)">Grade @g</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        @if (Model.HasReservations)
+                        {
+                            <div class="form-text mb-3">The unit cannot change because buyers already reserved in @b.Unit.</div>
+                        }
+
+                        <div class="alert alert-light border small mb-3" id="previewBox">
+                            <div class="fw-semibold" id="previewSummary">Enter the actual yield to preview the result.</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Confirm harvest</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-7">
+        <div class="alert alert-info small" role="alert">
+            Reservations are filled <strong>oldest first</strong>. If the harvest is smaller than the amount reserved,
+            the reservation where the yield runs out is partly filled and the later ones are cancelled.
+            Anything left over goes on sale to all verified buyers.
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Reservations on this harvest (oldest first)</h6>
+                @if (Model.Reservations.Count == 0)
+                {
+                    <p class="text-muted small mb-0">No one has reserved this harvest. The whole yield goes on sale.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Order</th>
+                                    <th>Buyer</th>
+                                    <th class="text-end">Reserved</th>
+                                    <th>Reserved on</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var n = 0;
+                                }
+                                @foreach (var r in Model.Reservations)
+                                {
+                                    n++;
+                                    <tr data-qty="@(r.Status == "Reserved" ? Model.Attr(r.QtyRequested) : null)">
+                                        <td>@n</td>
+                                        <td>@r.OrderNumber</td>
+                                        <td>@r.BuyerName</td>
+                                        <td class="text-end">@Model.FormatNumber(r.QtyRequested) @Model.UnitPlural(r.QtyRequested)</td>
+                                        <td class="small text-muted">@Model.FormatDateTime(r.ReservedAt)</td>
+                                        <td class="outcome small">@(r.Status == "Reserved" ? "" : Model.OutcomeText(r))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var yieldInput = document.getElementById('ActualYield');
+            if (!yieldInput) { return; }
+
+            var summary = document.getElementById('previewSummary');
+            var rows = Array.prototype.slice.call(document.querySelectorAll('tr[data-qty]'));
+            var totalReserved100 = 0;
+            rows.forEach(function (row) {
+                totalReserved100 += Math.round(parseFloat(row.getAttribute('data-qty')) * 100);
+            });
+
+            function fmt(hundredths) { return (hundredths / 100).toString(); }
+
+            function unitText(hundredths) {
+                var unit = document.getElementById('Unit').value;
+                return hundredths === 100 ? unit : unit + 's';
+            }
+
+            function update() {
+                var y = parseFloat(yieldInput.value);
+                rows.forEach(function (row) { row.querySelector('.outcome').textContent = ''; });
+
+                if (isNaN(y) || y <= 0) {
+                    summary.textContent = 'Enter the actual yield to preview the result.';
+                    return;
+                }
+
+                var y100 = Math.round(y * 100);
+                var remaining = y100;
+                var full = 0, partial = 0, cancelled = 0;
+
+                rows.forEach(function (row) {
+                    var q100 = Math.round(parseFloat(row.getAttribute('data-qty')) * 100);
+                    var filled = Math.min(remaining, q100);
+                    remaining = remaining - filled;
+                    var cell = row.querySelector('.outcome');
+
+                    if (filled === q100) {
+                        full++;
+                        cell.textContent = 'Filled in full';
+                    } else if (filled > 0) {
+                        partial++;
+                        cell.textContent = 'Partly filled: ' + fmt(filled) + ' of ' + fmt(q100);
+                    } else {
+                        cancelled++;
+                        cell.textContent = 'Cancelled (shortfall)';
+                    }
+                });
+
+                var text = fmt(y100) + ' ' + unitText(y100) + ' harvested against ' + fmt(totalReserved100) + ' reserved. ';
+                if (rows.length > 0) {
+                    text += full + ' filled in full, ' + partial + ' partly filled, ' + cancelled + ' cancelled. ';
+                }
+                text += remaining > 0 ? fmt(remaining) + ' ' + unitText(remaining) + ' will go on sale.' : 'Nothing is left to sell.';
+                summary.textContent = text;
+            }
+
+            yieldInput.addEventListener('input', update);
+            var unitEl = document.getElementById('Unit');
+            if (unitEl) { unitEl.addEventListener('change', update); }
+
+            document.getElementById('harvestForm').addEventListener('submit', function (e) {
+                if (!window.confirm('Record this harvest and settle the reservations? This cannot be undone.')) {
+                    e.preventDefault();
+                }
+            });
+
+            update();
+        })();
+    </script>
+}
