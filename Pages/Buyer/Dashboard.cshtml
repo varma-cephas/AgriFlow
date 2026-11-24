@@ -1,50 +1,279 @@
 ﻿@page
 @model AgriFlow.Pages.Buyer.DashboardModel
 @{
-    ViewData["Title"] = "Marketplace & Buyer Dashboard";
+    ViewData["Title"] = "Buyer dashboard";
+    var d = Model.Dash;
+    var verified = d.Business.Status == "Verified";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-1">Produce Marketplace</h3>
-        <p class="text-muted small mb-0">Welcome, @User.Identity?.Name. Browse upcoming harvests and verified farm supply.</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a asp-page="/Buyer/Marketplace" class="btn btn-success btn-sm">
-            <i class="bi bi-shop me-1"></i> Browse marketplace
-        </a>
-        <a asp-page="/Buyer/EditProfile" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-building me-1"></i> Edit business details
-        </a>
+<!-- Welcome banner -->
+<div class="card border-0 shadow-sm mb-4" style="background-color:#eef7f1;">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div>
+                <div class="text-muted small">Welcome back, @User.Identity?.Name</div>
+                <h3 class="fw-bold mb-2">@d.Business.Name</h3>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    @if (verified)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <i class="bi bi-patch-check me-1"></i>Verified buyer
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            <i class="bi bi-hourglass-split me-1"></i>@d.Business.Status - waiting for verification
+                        </span>
+                    }
+                    <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>@d.Business.City</span>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-page="/Buyer/Marketplace" class="btn btn-success btn-sm">
+                    <i class="bi bi-shop me-1"></i> Browse marketplace
+                </a>
+                <a href="#recent-orders" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-receipt me-1"></i> View my orders
+                </a>
+                <a asp-page="/Buyer/EditProfile" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-building me-1"></i> Edit business details
+                </a>
+            </div>
+        </div>
+
+        @if (d.Upcoming.Count > 0)
+        {
+            <hr class="my-3" />
+            <div class="small fw-semibold text-uppercase text-muted mb-2">Upcoming harvests to reserve</div>
+            <div class="row g-2">
+                @foreach (var u in d.Upcoming)
+                {
+                    <div class="col-md-4">
+                        <div class="bg-white rounded-3 border p-3 h-100 position-relative">
+                            <div class="fw-semibold">@u.CropName</div>
+                            <div class="small text-muted">@u.FarmName &middot; @u.District</div>
+                            <div class="small mt-1">
+                                Expected @Model.ShortDate(u.ExpectedDate) &middot;
+                                @Model.Num(u.Remaining) @Model.Plural(u.Remaining, u.Unit) left
+                            </div>
+                            <a asp-page="/Buyer/Marketplace" class="small fw-semibold text-success stretched-link">Reserve &rarr;</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-md-4">
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Available Listings</div>
-                <h4 class="fw-bold mb-1">0 listings</h4>
-                <p class="text-muted small mb-0">Harvested produce ready for immediate bulk order.</p>
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Open orders</div>
+                <h3 class="fw-bold mb-1">@d.Kpis.OpenOrders</h3>
+                <div class="text-muted small">Placed, confirmed or on the way</div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Active Reservations</div>
-                <h4 class="fw-bold mb-1">0 reserved</h4>
-                <p class="text-muted small mb-0">Upcoming crops reserved prior to harvest.</p>
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Reserved supply</div>
+                <h3 class="fw-bold mb-1">@Model.Tonnes(d.Kpis.ReservedTonnes) t</h3>
+                <div class="text-muted small">Waiting for harvest</div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Unpaid Invoices</div>
-                <h4 class="fw-bold mb-1">0 RWF</h4>
-                <p class="text-muted small mb-0">Invoices generated from accepted deliveries.</p>
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Spend this month</div>
+                <h3 class="fw-bold mb-1">@Model.Money(d.Kpis.SpendThisMonth)</h3>
+                <div class="text-muted small">Orders placed since the 1st</div>
             </div>
         </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small fw-semibold text-uppercase mb-1">Unpaid invoices</div>
+                <h3 class="fw-bold mb-1">@Model.Money(d.Kpis.UnpaidAmount)</h3>
+                <div class="text-muted small">@d.Kpis.UnpaidCount unpaid @(d.Kpis.UnpaidCount == 1 ? "invoice" : "invoices")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Chart -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h6 class="fw-bold mb-0">Incoming supply, next 6 weeks (tonnes)</h6>
+                    <div class="small text-muted">
+                        <span class="d-inline-block rounded-1 me-1" style="width:10px;height:10px;background:#1b653c;"></span>Confirmed
+                        <span class="d-inline-block rounded-1 ms-3 me-1" style="width:10px;height:10px;background:#e0a526;"></span>Reserved
+                    </div>
+                </div>
+
+                @if (Model.ChartMax <= 0)
+                {
+                    <p class="text-muted small mb-0">
+                        No supply is coming in the next 6 weeks. Reserve an upcoming harvest or place an order to see it here.
+                    </p>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-between gap-2">
+                        @foreach (var w in d.Weeks)
+                        {
+                            <div class="flex-fill text-center">
+                                <div class="d-flex align-items-end justify-content-center gap-1" style="height:150px;">
+                                    <div title="Confirmed: @Model.Tonnes(w.ConfirmedTonnes) t"
+                                         style="width:38%;height:@Model.Pct(w.ConfirmedTonnes)%;min-height:@Model.MinH(w.ConfirmedTonnes);background:#1b653c;border-radius:3px 3px 0 0;"></div>
+                                    <div title="Reserved: @Model.Tonnes(w.ReservedTonnes) t"
+                                         style="width:38%;height:@Model.Pct(w.ReservedTonnes)%;min-height:@Model.MinH(w.ReservedTonnes);background:#e0a526;border-radius:3px 3px 0 0;"></div>
+                                </div>
+                                <div class="border-top mt-1 pt-1 small fw-semibold">@Model.ShortDate(w.WeekStart)</div>
+                                <div class="text-muted" style="font-size:.7rem;">
+                                    @Model.Tonnes(w.ConfirmedTonnes) / @Model.Tonnes(w.ReservedTonnes)
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="text-muted small mt-2">Under each week: confirmed / reserved, in tonnes. Weeks start on the date shown.</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Needs your attention -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Needs your attention</h6>
+
+                @{
+                    var allClear = d.Deliveries.Count == 0 && d.InvoicesDue.Count == 0
+                                   && d.PartlyFilled.Count == 0 && d.NewSupply.Count == 0;
+                }
+
+                @if (allClear)
+                {
+                    <p class="text-muted small mb-0"><i class="bi bi-check-circle text-success me-1"></i>All clear. Nothing needs you right now.</p>
+                }
+
+                @if (d.Deliveries.Count > 0)
+                {
+                    <div class="small fw-semibold mb-1"><i class="bi bi-truck me-1 text-warning"></i>Deliveries to check</div>
+                    <ul class="list-unstyled small mb-3">
+                        @foreach (var x in d.Deliveries)
+                        {
+                            <li class="mb-1">
+                                @x.OrderNumber &middot; @x.CropName from @x.FarmName
+                                <span class="badge @Model.StatusBadge(x.Status)">@x.Status</span>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (d.InvoicesDue.Count > 0)
+                {
+                    <div class="small fw-semibold mb-1"><i class="bi bi-cash-coin me-1 text-danger"></i>Invoices due</div>
+                    <ul class="list-unstyled small mb-3">
+                        @foreach (var x in d.InvoicesDue)
+                        {
+                            <li class="mb-1">
+                                @x.InvoiceNumber &middot; @Model.Money(x.Amount) &middot; due @Model.ShortDate(x.DueDate)
+                                @if (x.DueDate.Date < Model.Today)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Overdue</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (d.PartlyFilled.Count > 0)
+                {
+                    <div class="small fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1 text-warning"></i>Partly filled reservations</div>
+                    <ul class="list-unstyled small mb-3">
+                        @foreach (var x in d.PartlyFilled)
+                        {
+                            <li class="mb-1">
+                                @x.OrderNumber &middot; you got @Model.Num(x.Confirmed) of @Model.Num(x.Requested)
+                                @Model.Plural(x.Requested, x.Unit) of @x.CropName
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (d.NewSupply.Count > 0)
+                {
+                    <div class="small fw-semibold mb-1"><i class="bi bi-stars me-1 text-success"></i>New supply this week</div>
+                    <ul class="list-unstyled small mb-0">
+                        @foreach (var x in d.NewSupply)
+                        {
+                            <li class="mb-1">
+                                @x.CropName &middot; @x.FarmName (@x.District)
+                                <span class="text-muted">@(x.Status == "Upcoming" ? "upcoming" : "available now")</span>
+                                @if (x.Nearby)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Nearby</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent orders -->
+<div class="card border-0 shadow-sm" id="recent-orders">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">Recent orders</h6>
+        @if (d.RecentOrders.Count == 0)
+        {
+            <p class="text-muted small mb-0">
+                You have no orders yet. <a asp-page="/Buyer/Marketplace">Browse the marketplace</a> to place your first order.
+            </p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Produce</th>
+                            <th>Farm</th>
+                            <th class="text-end">Quantity</th>
+                            <th class="text-end">Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in d.RecentOrders)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@o.OrderNumber</td>
+                                <td>@o.CropName</td>
+                                <td>@o.FarmName</td>
+                                <td class="text-end">@Model.Num(o.Qty) @Model.Plural(o.Qty, o.Unit)</td>
+                                <td class="text-end">@Model.Money(o.Total)</td>
+                                <td><span class="badge @Model.StatusBadge(o.Status)">@o.Status</span></td>
+                                <td class="small text-muted">@Model.LongDate(o.CreatedAt.ToLocalTime())</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>

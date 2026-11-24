@@ -12,6 +12,7 @@ builder.Services.AddScoped<MarketplaceRepository>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<HarvestRepository>();
+builder.Services.AddScoped<BuyerDashboardRepository>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
