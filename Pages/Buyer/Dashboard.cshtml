@@ -2,43 +2,44 @@
 @model AgriFlow.Pages.Buyer.DashboardModel
 @{
     ViewData["Title"] = "Marketplace & Buyer Dashboard";
+    ViewData["Breadcrumb"] = "Buyer workspace / Overview";
+    Func<dynamic, object> actions = @<a asp-page="/Buyer/EditProfile" class="af-btn af-btn-secondary"><i class="bi bi-building"></i> Edit business details</a>;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-1">Produce Marketplace</h3>
-        <p class="text-muted small mb-0">Welcome, @User.Identity?.Name. Browse upcoming harvests and verified farm supply.</p>
-    </div>
-    <a asp-page="/Buyer/EditProfile" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-building me-1"></i> Edit business details
-    </a>
-</div>
+<partial name="_PageHeader" model='new PageHeaderModel {
+    Icon = "bi-shop",
+    Title = "Produce Marketplace",
+    Subtitle = "Welcome, " + User.Identity?.Name + ". Browse upcoming harvests and verified farm supply.",
+    Actions = actions }' />
 
 <div class="row g-3">
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Available Listings</div>
-                <h4 class="fw-bold mb-1">0 listings</h4>
-                <p class="text-muted small mb-0">Harvested produce ready for immediate bulk order.</p>
+        <div class="af-card af-kpi">
+            <div class="af-icon-tile"><i class="bi bi-tag"></i></div>
+            <div>
+                <div class="kpi-label">Available listings</div>
+                <div class="kpi-value">0 listings</div>
+                <div class="kpi-sub">Harvested produce ready for immediate bulk order.</div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Active Reservations</div>
-                <h4 class="fw-bold mb-1">0 reserved</h4>
-                <p class="text-muted small mb-0">Upcoming crops reserved prior to harvest.</p>
+        <div class="af-card af-kpi">
+            <div class="af-icon-tile af-tile-blue"><i class="bi bi-calendar-check"></i></div>
+            <div>
+                <div class="kpi-label">Active reservations</div>
+                <div class="kpi-value">0 reserved</div>
+                <div class="kpi-sub">Upcoming crops reserved prior to harvest.</div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small fw-semibold text-uppercase mb-1">Unpaid Invoices</div>
-                <h4 class="fw-bold mb-1">0 RWF</h4>
-                <p class="text-muted small mb-0">Invoices generated from accepted deliveries.</p>
+        <div class="af-card af-kpi">
+            <div class="af-icon-tile af-tile-purple"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="kpi-label">Unpaid invoices</div>
+                <div class="kpi-value">0 RWF</div>
+                <div class="kpi-sub">Invoices generated from accepted deliveries.</div>
             </div>
         </div>
     </div>
