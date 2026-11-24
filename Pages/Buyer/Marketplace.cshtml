@@ -1,0 +1,205 @@
+﻿@page
+@model AgriFlow.Pages.Buyer.MarketplaceModel
+@{
+    ViewData["Title"] = "Marketplace";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold mb-1">Marketplace</h3>
+        <p class="text-muted small mb-0">Bulk supply from verified farms. Order what is ready now, or reserve before harvest.</p>
+    </div>
+    <a asp-page="/Buyer/Dashboard" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+@if (Model.RestrictionMessage is not null)
+{
+    <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-hourglass-split"></i>
+        <div>@Model.RestrictionMessage</div>
+    </div>
+}
+
+<div class="alert alert-info d-flex align-items-start gap-2" role="alert">
+    <i class="bi bi-info-circle"></i>
+    <div>
+        Upcoming harvests are reserved <strong>oldest first</strong>. If the harvest turns out smaller than
+        expected, earlier reservations are filled first and later ones may receive less.
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link @(Model.Tab == "all" ? "active" : "")" href="@Model.TabUrl("all")">
+            All <span class="badge bg-secondary-subtle text-secondary">@Model.AllCount</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Tab == "available" ? "active" : "")" href="@Model.TabUrl("available")">
+            Available now <span class="badge bg-secondary-subtle text-secondary">@Model.AvailableCount</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.Tab == "upcoming" ? "active" : "")" href="@Model.TabUrl("upcoming")">
+            Upcoming harvests <span class="badge bg-secondary-subtle text-secondary">@Model.UpcomingCount</span>
+        </a>
+    </li>
+</ul>
+
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <input type="hidden" name="Tab" value="@Model.Tab" />
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-lg-3">
+                <label class="form-label small text-muted mb-1" for="Search">Search</label>
+                <input type="search" class="form-control" id="Search" name="Search" value="@Model.Search" placeholder="Crop or farm name" />
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small text-muted mb-1" for="CropId">Crop</label>
+                <select class="form-select" id="CropId" name="CropId">
+                    <option value="">All crops</option>
+                    @foreach (var crop in Model.Options.Crops)
+                    {
+                        <option value="@crop.Id" selected="@(Model.CropId == crop.Id)">@crop.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small text-muted mb-1" for="Province">Province</label>
+                <select class="form-select" id="Province" name="Province">
+                    <option value="">All provinces</option>
+                    @foreach (var province in Model.Options.Provinces)
+                    {
+                        <option value="@province" selected="@(Model.Province == province)">@province</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small text-muted mb-1" for="Grade">Grade</label>
+                <select class="form-select" id="Grade" name="Grade">
+                    <option value="">Any grade</option>
+                    @foreach (var grade in new[] { "A", "B", "C" })
+                    {
+                        <option value="@grade" selected="@(Model.Grade == grade)">Grade @grade</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small text-muted mb-1" for="Sort">Sort by</label>
+                <select class="form-select" id="Sort" name="Sort">
+                    <option value="">Newest first</option>
+                    <option value="price_asc" selected="@(Model.Sort == "price_asc")">Price: low to high</option>
+                    <option value="price_desc" selected="@(Model.Sort == "price_desc")">Price: high to low</option>
+                    <option value="date" selected="@(Model.Sort == "date")">Harvest date: soonest</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-1 d-grid">
+                <button type="submit" class="btn btn-success">Apply</button>
+            </div>
+        </div>
+        @if (Model.HasFilters)
+        {
+            <div class="mt-2">
+                <a href="@Model.ClearUrl" class="small">Clear filters</a>
+            </div>
+        }
+    </div>
+</form>
+
+@if (Model.Listings.Count == 0)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-basket fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2">No listings found</h5>
+            <p class="text-muted small mb-0">
+                @(Model.HasFilters ? "Try changing or clearing your filters." : "There is no produce from verified farms on the marketplace yet. Check back soon.")
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        @foreach (var l in Model.Listings)
+        {
+            var isAvailable = l.Status == "Available";
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            @if (isAvailable)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Available now</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Upcoming harvest</span>
+                            }
+                            <span class="badge bg-light text-dark border">Grade @l.Grade</span>
+                        </div>
+
+                        <h5 class="fw-bold mb-1">@l.CropName</h5>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-geo-alt me-1"></i>@l.FarmName &middot; @l.District
+                        </p>
+
+                        <div class="mb-3">
+                            <span class="fs-4 fw-bold" style="color: #165432;">@Model.Money(l.PricePerUnit)</span>
+                            <span class="text-muted small">per @Model.UnitLabel(l)</span>
+                        </div>
+
+                        <ul class="list-unstyled small mb-3">
+                            <li class="d-flex justify-content-between py-1 border-bottom">
+                                <span class="text-muted">@(isAvailable ? "Available" : "Estimated")</span>
+                                <span class="fw-semibold">@Model.Qty(l)</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom">
+                                <span class="text-muted">Minimum order</span>
+                                <span class="fw-semibold">@Model.MinOrder(l)</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1">
+                                <span class="text-muted">@(isAvailable ? "Harvested" : "Expected")</span>
+                                <span class="fw-semibold">@Model.FormatDate(l.DisplayDate)</span>
+                            </li>
+                        </ul>
+
+                        <div class="mt-auto">
+                            @if (isAvailable)
+                            {
+                                if (Model.CanAct)
+                                {
+                                    <a class="btn btn-success w-100" href="@Model.OrderUrl(l.Id)">Order now</a>
+                                }
+                                else
+                                {
+                                    <span class="d-block" title="@Model.RestrictionMessage">
+                                        <button type="button" class="btn btn-success w-100" disabled>Order now</button>
+                                    </span>
+                                }
+                            }
+                            else if (!l.OpenForReservation)
+                            {
+                                <span class="d-block" title="The farmer has closed reservations for this harvest.">
+                                    <button type="button" class="btn btn-outline-success w-100" disabled>Reservations closed</button>
+                                </span>
+                            }
+                            else if (Model.CanAct)
+                            {
+                                <a class="btn btn-outline-success w-100" href="@Model.ReserveUrl(l.Id)">Reserve supply</a>
+                            }
+                            else
+                            {
+                                <span class="d-block" title="@Model.RestrictionMessage">
+                                    <button type="button" class="btn btn-outline-success w-100" disabled>Reserve supply</button>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
