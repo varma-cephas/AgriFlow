@@ -1,9 +1,9 @@
+using System.Globalization;
+using System.Security.Claims;
 using AgriFlow.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Globalization;
-using System.Security.Claims;
 
 namespace AgriFlow.Pages.Buyer;
 
@@ -11,8 +11,15 @@ namespace AgriFlow.Pages.Buyer;
 public class MarketplaceModel : PageModel
 {
     private readonly MarketplaceRepository _repo;
+    private readonly OrderRepository _orders;
+    private readonly ReservationRepository _reservations;
 
-    public MarketplaceModel(MarketplaceRepository repo) => _repo = repo;
+    public MarketplaceModel(MarketplaceRepository repo, OrderRepository orders, ReservationRepository reservations)
+    {
+        _repo = repo;
+        _orders = orders;
+        _reservations = reservations;
+    }
 
     // Filters come from the address bar (?Tab=...&Search=...), so a filtered page can be bookmarked.
     [BindProperty(SupportsGet = true)] public string? Tab { get; set; }
@@ -21,6 +28,10 @@ public class MarketplaceModel : PageModel
     [BindProperty(SupportsGet = true)] public string? Province { get; set; }
     [BindProperty(SupportsGet = true)] public string? Grade { get; set; }
     [BindProperty(SupportsGet = true)] public string? Sort { get; set; }
+
+    // Messages shown once after a reservation attempt.
+    [TempData] public string? StatusMessage { get; set; }
+    [TempData] public string? ErrorMessage { get; set; }
 
     public List<MarketplaceListing> Listings { get; private set; } = new();
     public MarketplaceFilterOptions Options { get; private set; } =
@@ -33,6 +44,7 @@ public class MarketplaceModel : PageModel
     // 'Verified', 'Pending' or 'Rejected'. Anything unknown is treated as Pending.
     public string BuyerStatus { get; private set; } = "Pending";
     public bool CanAct => BuyerStatus == "Verified";
+    public string DefaultAddress { get; private set; } = "";
 
     public string? RestrictionMessage => BuyerStatus switch
     {
@@ -55,7 +67,12 @@ public class MarketplaceModel : PageModel
 
         if (int.TryParse(User.FindFirstValue("BuyerBusinessId"), out var businessId))
         {
-            BuyerStatus = await _repo.GetBuyerStatusAsync(businessId) ?? "Pending";
+            var buyer = await _orders.GetBuyerInfoAsync(businessId);
+            if (buyer is not null)
+            {
+                BuyerStatus = buyer.Status;
+                DefaultAddress = buyer.Address.Length > 250 ? buyer.Address[..250] : buyer.Address;
+            }
         }
 
         var all = await _repo.GetListingsAsync(new MarketplaceFilter(Search, CropId, Province, Grade, Sort));
@@ -72,6 +89,51 @@ public class MarketplaceModel : PageModel
         Options = await _repo.GetFilterOptionsAsync();
     }
 
+    // Runs when the "Reserve supply" pop-up form is submitted.
+    public async Task<IActionResult> OnPostReserveAsync(int listingId, string? quantity, string? deliveryAddress)
+    {
+        if (!int.TryParse(User.FindFirstValue("BuyerBusinessId"), out var businessId) ||
+            !int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Forbid();
+        }
+
+        if (!decimal.TryParse(quantity, NumberStyles.Number, CultureInfo.InvariantCulture, out var qty) || qty <= 0)
+        {
+            ErrorMessage = "Enter a valid quantity.";
+            return RedirectToPage(new { Tab = "upcoming" });
+        }
+        if (decimal.Round(qty, 2) != qty)
+        {
+            ErrorMessage = "The quantity can have at most 2 decimal places.";
+            return RedirectToPage(new { Tab = "upcoming" });
+        }
+
+        var address = deliveryAddress?.Trim() ?? "";
+        if (address.Length == 0 || address.Length > 250)
+        {
+            ErrorMessage = "Enter the delivery address (250 characters at most).";
+            return RedirectToPage(new { Tab = "upcoming" });
+        }
+
+        var result = await _reservations.ReserveAsync(
+            new ReserveRequest(listingId, userId, businessId, qty, address));
+
+        if (result.Success)
+        {
+            var unit = qty == 1 ? result.Unit : result.Unit + "s";
+            StatusMessage = $"Reservation saved ({result.OrderNumber}): {FormatNumber(qty)} {unit} of {result.CropName} " +
+                            $"from {result.FarmName}. Estimated value {Money(result.Total)}. " +
+                            "It will be filled oldest first at harvest.";
+        }
+        else
+        {
+            ErrorMessage = result.ErrorMessage;
+        }
+
+        return RedirectToPage(new { Tab = "upcoming" });
+    }
+
     // Tab links keep the filters the buyer already chose.
     public string? TabUrl(string tab) => Url.Page("/Buyer/Marketplace", new
     {
@@ -85,12 +147,12 @@ public class MarketplaceModel : PageModel
 
     public string? ClearUrl => Url.Page("/Buyer/Marketplace", new { Tab });
 
-    // These pages belong to AGRI-24 (order) and AGRI-23 (reserve). Change the paths
-    // here when you build them.
+    // Opens the listing page built in AGRI-24.
     public string OrderUrl(int listingId) => $"/Buyer/ListingDetails?id={listingId}";
-    public string ReserveUrl(int listingId) => $"/Buyer/Reserve?id={listingId}";
 
     // ---- Display helpers (fixed culture so numbers look the same on every PC) ----
+    public string Attr(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
     public string Money(decimal value) =>
         value.ToString("#,##0", CultureInfo.InvariantCulture) + " RWF";
 
