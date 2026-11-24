@@ -15,8 +15,8 @@ public class AuditModel : PageModel
     public AuditModel(DbConnectionFactory db) => _db = db;
     public async Task OnGetAsync()
     {
-        const string sql = @"SELECT TOP (200) l.CreatedAt,ISNULL(u.FullName,'System'),l.Entity,l.Action,ISNULL(l.Summary,''),l.Result
-            FROM audit_log l LEFT JOIN app_user u ON u.Id=l.ActorUserId ORDER BY l.CreatedAt DESC;";
+        const string sql = @"SELECT TOP (200) l.At,ISNULL(u.FullName,'System'),l.Entity,l.Action,ISNULL(l.Summary,''),l.Result
+            FROM audit_log l LEFT JOIN app_user u ON u.Id=l.ActorUserId ORDER BY l.At DESC;";
         var rows = new List<AdminAuditRow>();
         await using var connection = _db.CreateConnection(); await connection.OpenAsync();
         await using var command = new SqlCommand(sql, connection); await using var reader = await command.ExecuteReaderAsync();

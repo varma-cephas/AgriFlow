@@ -15,9 +15,10 @@ public class OrdersModel : PageModel
     public OrdersModel(DbConnectionFactory db) => _db = db;
     public async Task OnGetAsync()
     {
-        const string sql = @"SELECT o.Id,hl.CropName,ISNULL(b.FullName,''),ISNULL(f.FullName,''),oi.QuantityOrdered,o.TotalAmount,o.Status,o.CreatedAt
-            FROM orders o INNER JOIN order_items oi ON oi.OrderId=o.Id INNER JOIN harvest_listing hl ON hl.Id=oi.HarvestListingId
-            LEFT JOIN app_user b ON b.Id=o.CustomerId LEFT JOIN app_user f ON f.Id=hl.FarmerId ORDER BY o.CreatedAt DESC;";
+        const string sql = @"SELECT o.Id,c.Name,ISNULL(b.Name,''),ISNULL(f.FullName,''),oi.QtyRequested,o.TotalAmount,o.Status,o.CreatedAt
+            FROM orders o INNER JOIN order_item oi ON oi.OrderId=o.Id INNER JOIN listing l ON l.Id=oi.ListingId
+            INNER JOIN crop c ON c.Id=l.CropId INNER JOIN buyer_business b ON b.Id=o.BuyerBusinessId
+            LEFT JOIN app_user f ON f.Id=l.FarmerId ORDER BY o.CreatedAt DESC;";
         var rows = new List<AdminOrderRow>();
         await using var connection = _db.CreateConnection(); await connection.OpenAsync();
         await using var command = new SqlCommand(sql, connection); await using var reader = await command.ExecuteReaderAsync();

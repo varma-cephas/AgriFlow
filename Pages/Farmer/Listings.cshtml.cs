@@ -19,6 +19,11 @@ public class ListingsModel : PageModel
     public async Task OnGetAsync() => await LoadAsync();
     public async Task<IActionResult> OnPostCreateAsync()
     {
+        if (BatchId <= 0) Error = "Select a planting batch.";
+        else if (Quantity <= 0) Error = "Available quantity must be greater than zero.";
+        else if (PricePerUnit <= 0) Error = "Price per unit must be greater than zero.";
+        else if (Unit is not ("kg" or "crate" or "bag" or "tonne")) Error = "Select a valid unit.";
+        if (Error is not null) { await LoadAsync(); return Page(); }
         try { await _repository.CreateListingAsync(UserId(), BatchId, Quantity, PricePerUnit, Unit); TempData["Success"]="Harvest listing created."; return RedirectToPage(); }
         catch (InvalidOperationException ex) { Error=ex.Message; await LoadAsync(); return Page(); }
     }

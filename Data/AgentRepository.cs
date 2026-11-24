@@ -32,15 +32,18 @@ public sealed class AgentRepository
                 COUNT(DISTINCT a.FarmerId),
                 (SELECT COUNT(*) FROM planting_batch pb
                  INNER JOIN agent_farmer_assignment aa ON aa.FarmerId = pb.FarmerId
-                 WHERE aa.AgentId = @AgentId AND pb.Status = 'active'),
+                 WHERE aa.AgentId = @AgentId AND pb.Status = 'Active'),
                 (SELECT COUNT(*) FROM planting_batch pb
                  INNER JOIN agent_farmer_assignment aa ON aa.FarmerId = pb.FarmerId
                  WHERE aa.AgentId = @AgentId
                    AND pb.PredictedHarvestDate BETWEEN CAST(GETDATE() AS date)
                    AND DATEADD(day, 14, CAST(GETDATE() AS date))),
-                (SELECT COUNT(*) FROM orders o
-                 INNER JOIN buyer_business bb ON bb.Id = o.CustomerId
-                 WHERE 1 = 0)
+                 (SELECT COUNT(DISTINCT o.Id) FROM orders o
+                  INNER JOIN order_item oi ON oi.OrderId = o.Id
+                  INNER JOIN listing l ON l.Id = oi.ListingId
+                  INNER JOIN agent_farmer_assignment aa ON aa.FarmerId = l.FarmerId
+                  WHERE aa.AgentId = @AgentId
+                    AND o.Status IN ('Placed','Confirmed','Dispatched'))
             FROM agent_farmer_assignment a
             WHERE a.AgentId = @AgentId;";
 
@@ -68,8 +71,8 @@ public sealed class AgentRepository
                 fp.District,
                 ISNULL(u.Phone, ''),
                 (SELECT COUNT(*) FROM planting_batch pb
-                 WHERE pb.FarmerId = fp.UserId AND pb.Status = 'active'),
-                ISNULL((SELECT SUM(ss.CurrentStock) FROM supply_stock ss
+                 WHERE pb.FarmerId = fp.UserId AND pb.Status = 'Active'),
+                 ISNULL((SELECT SUM(ss.Quantity) FROM seed_stock ss
                         WHERE ss.FarmerId = fp.UserId), 0),
                 0,
                 fp.VerificationStatus
