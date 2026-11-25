@@ -333,6 +333,20 @@ CREATE INDEX IX_a_at ON audit_log(At DESC);
 CREATE INDEX IX_a_actor ON audit_log(ActorUserId, At DESC);
 
 
+/* OTP Code*/
+CREATE TABLE otp_code (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    Email        NVARCHAR(256) NOT NULL,
+    CodeHash     VARBINARY(32) NOT NULL,
+    Purpose      NVARCHAR(20)  NOT NULL CONSTRAINT DF_otp_purpose DEFAULT 'Verification', -- 'Verification' | 'Login'
+    ExpiresAtUtc DATETIME2     NOT NULL,
+    IsUsed       BIT           NOT NULL CONSTRAINT DF_otp_used DEFAULT 0,
+    Attempts     INT           NOT NULL CONSTRAINT DF_otp_attempts DEFAULT 0,
+    CreatedAtUtc DATETIME2     NOT NULL CONSTRAINT DF_otp_created DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX IX_otp_email_active ON otp_code(Email, IsUsed, ExpiresAtUtc);
+
+
 /* ---------------------------------------------------------------------
    13. STARTER DATA – crop catalog
    (Users, farms, listings and orders: see AGRI-11 seed data.)
