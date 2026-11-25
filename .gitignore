@@ -1,5 +1,33 @@
-﻿.vs/
-bin/
-obj/
-
+﻿
+# Visual Studio
+.vs/
 *.user
+*.suo
+
+# .NET Backend
+backend/.vs
+backend/bin
+backend/obj
+backend/secrets.json
+backend/appsettings.Development.json
+
+# VS Code
+.vscode/
+
+# Frontend - Node.js
+frontend/node_modules/
+frontend/dist/
+
+# Frontend environment variables
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# OS generated files
+.DS_Store
+Thumbs.db
