@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -18,9 +18,19 @@
         </main>
     </div>
 
+    <partial name="_ToastPartial" />
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const toastElement = document.getElementById('appToast');
+            if (toastElement && window.bootstrap) {
+                window.bootstrap.Toast.getOrCreateInstance(toastElement, { autohide: true, delay: 5000 }).show();
+            }
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

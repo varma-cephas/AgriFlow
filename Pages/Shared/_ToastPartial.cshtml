@@ -1,0 +1,25 @@
+@{
+    var toastMessage = TempData["ToastMessage"]?.ToString();
+    var toastType = TempData["ToastType"]?.ToString()?.ToLowerInvariant();
+    var (toastTitle, toastHeaderClass, toastBodyClass) = toastType switch
+    {
+        "success" => ("Success", "bg-success text-white", "text-success-emphasis"),
+        "warning" => ("Warning", "bg-warning text-dark", "text-warning-emphasis"),
+        "error" => ("Error", "bg-danger text-white", "text-danger-emphasis"),
+        "low-stock" => ("Low stock", "bg-danger text-white", "text-danger-emphasis"),
+        _ => ("Notification", "bg-secondary text-white", string.Empty)
+    };
+}
+
+@if (!string.IsNullOrWhiteSpace(toastMessage))
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true" style="z-index: 1090;">
+        <div id="appToast" class="toast border-0" role="status" aria-live="polite" aria-atomic="true">
+            <div class="toast-header @toastHeaderClass">
+                <strong class="me-auto">@toastTitle</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body @toastBodyClass">@toastMessage</div>
+        </div>
+    </div>
+}

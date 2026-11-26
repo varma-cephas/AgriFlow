@@ -1,5 +1,6 @@
 @page
 @model AgriFlow.Pages.SeedStock.IndexModel
+
 @{
     ViewData["Title"] = "Seed stock";
 }
@@ -7,6 +8,64 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h1 class="h3 mb-1">Seed stock</h1>
+ feature/AGRI-17-low-stock-warnings
+        <p class="text-muted mb-0">Inventory items at or below 10 are marked low stock.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle bg-white">
+            <thead>
+                <tr>
+                    @if (User.IsInRole("Agent") || User.IsInRole("Admin"))
+                    {
+                        <th scope="col">Farm</th>
+                    }
+                    <th scope="col">Crop</th>
+                    <th scope="col">Variety</th>
+                    <th scope="col">Available quantity</th>
+                    <th scope="col">Last updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        @if (User.IsInRole("Agent") || User.IsInRole("Admin"))
+                        {
+                            <td>@item.FarmName</td>
+                        }
+                        <td>@item.CropName</td>
+                        <td>@item.Variety</td>
+                        <td>
+                            @item.Quantity.ToString("0.##") @item.Unit
+                            @if (item.Quantity <= SeedStockRepository.LowStockThreshold)
+                            {
+                                <span class="badge bg-danger">Low stock</span>
+                            }
+                        </td>
+                        <td>@item.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
+                    </tr>
+                }
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="@(User.IsInRole("Agent") || User.IsInRole("Admin") ? 5 : 4)" class="text-center text-muted py-4">
+                            No seed stock found in your authorized inventory scope.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
         <div class="text-muted">Active farmer/farm: @Model.ActiveFarmerName</div>
     </div>
     @if (Model.ActiveFarmerId.HasValue)
@@ -120,3 +179,4 @@
         }
     </script>
 }
+

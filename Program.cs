@@ -8,6 +8,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddSingleton<NationalIdProtector>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<SeedStockRepository>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
