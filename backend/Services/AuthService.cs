@@ -155,12 +155,11 @@ namespace backend.Services
             return (true, "Registration successful. Check your email for the 6-digit verification code.");
         }
 
-        public async Task<(bool Success, string Message, AuthResponse? Data)> LoginAsync(LoginRequest req, CancellationToken ct = default)
+        public async Task<(bool Success, string Message, LoginChallengeResponse? Data)> LoginAsync(LoginRequest req, CancellationToken ct = default)
         {
             var email = req.Email.Trim().ToLowerInvariant();
             var user = await db.Users
-                .Include(u => u.FarmerProfile)
-                .Include(u => u.BuyerBusiness)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email, ct);
 
             if (user is null || string.IsNullOrEmpty(user.PasswordHash) ||
@@ -172,14 +171,18 @@ namespace backend.Services
             if (!user.IsActive)
                 return (false, $"Account suspended: {user.SuspendedReason ?? "Contact support."}", null);
 
-            user.LastLoginAt = DateTime.UtcNow;
-            await db.SaveChangesAsync(ct);
+            await otpService.GenerateAndSendAsync(email, "Login", ct);
 
-            var status = ResolveVerificationStatus(user);
-            var token = tokenService.GenerateToken(user, status);
-
-            return (true, "Signed in.", new AuthResponse(
-                token, user.Id, user.FullName, user.Email!, user.Role, status, user.BuyerBusinessId));
+            return (
+                true,
+                "Verification code sent.",
+                new LoginChallengeResponse(
+                    RequiresOtp: true,
+                    Email: user.Email!,
+                    Role: user.Role,
+                    Message: "Check your email for the 6-digit sign-in code."
+                )
+            );
         }
 
         public async Task<(bool Success, string Message, AuthResponse? Data)> VerifyOtpAndSignInAsync(VerifyOtpRequest req, CancellationToken ct = default)

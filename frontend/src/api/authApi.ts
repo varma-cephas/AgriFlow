@@ -1,6 +1,7 @@
 import axiosClient from './axiosClient';
 import type {
   AuthResponse,
+  LoginChallengeResponse,
   LoginRequest,
   RegisterBuyerRequest,
   RegisterFarmerRequest,
@@ -27,7 +28,7 @@ export const authApi = {
   },
 
   login: async (payload: LoginRequest) => {
-    const { data } = await axiosClient.post<AuthResponse>('/auth/login', payload);
+    const { data } = await axiosClient.post<LoginChallengeResponse>('/auth/login', payload);
     return data;
   },
 

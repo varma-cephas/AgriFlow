@@ -10,6 +10,7 @@ interface VerifyLocationState {
   email?: string;
   role?: UserRole;
   purpose?: 'Verification' | 'Login';
+  keepSignedIn?: boolean;
 }
 
 export const VerifyOtpPage: React.FC = () => {
@@ -20,6 +21,7 @@ export const VerifyOtpPage: React.FC = () => {
   const state = (location.state as VerifyLocationState) ?? {};
   const [email] = useState<string>(state.email ?? '');
   const purpose = state.purpose ?? 'Verification';
+  const keepSignedIn = state.keepSignedIn ?? true;
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [submitting, setSubmitting] = useState(false);
@@ -77,38 +79,38 @@ export const VerifyOtpPage: React.FC = () => {
   };
 
   const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setInfoMessage(null);
+        e.preventDefault();
+        setError(null);
+        setInfoMessage(null);
 
-    const code = digits.join('');
-    if (!email) {
-      setError('Missing email address. Please return to registration or sign in.');
-      return;
-    }
-    if (code.length !== 6) {
-      setError('Enter all 6 digits from your verification email.');
-      return;
-    }
+        const code = digits.join('');
+        if (!email) {
+            setError('Missing email address. Please return to registration or sign in.');
+            return;
+        }
+        if (code.length !== 6) {
+            setError('Enter all 6 digits from your verification email.');
+            return;
+        }
 
-    setSubmitting(true);
-    try {
-      const auth = await authApi.verifyOtp({ email, code, purpose });
-      setSession(auth, true);
+        setSubmitting(true);
+        try {
+            const auth = await authApi.verifyOtp({ email, code, purpose });
+            setSession(auth, keepSignedIn);
 
-      if (auth.verificationStatus === 'Unverified' || auth.verificationStatus === 'Pending') {
-        navigate('/pending', { replace: true });
-      } else if (auth.role === 'Buyer') {
-        navigate('/buyer/dashboard', { replace: true });
-      } else {
-        navigate('/farmer/dashboard', { replace: true });
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid or expired verification code.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+            if (auth.verificationStatus === 'Unverified' || auth.verificationStatus === 'Pending') {
+            navigate('/pending', { replace: true });
+            } else if (auth.role === 'Buyer') {
+            navigate('/buyer/dashboard', { replace: true });
+            } else {
+            navigate('/farmer/dashboard', { replace: true });
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Invalid or expired verification code.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
   const handleResend = async () => {
     if (!email || cooldown > 0 || resending) return;
@@ -138,11 +140,11 @@ export const VerifyOtpPage: React.FC = () => {
     >
       <div>
         <Link
-          to="/register"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 mb-6"
+        to={purpose === 'Login' ? '/login' : '/register'}
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 mb-6"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back to registration
+        <ArrowLeft className="w-3.5 h-3.5" />
+        {purpose === 'Login' ? 'Back to sign in' : 'Back to registration'}
         </Link>
 
         <div className="w-11 h-11 rounded-full bg-agri-50 border border-emerald-200 flex items-center justify-center text-agri-700 mb-5">

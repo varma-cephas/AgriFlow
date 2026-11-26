@@ -104,3 +104,10 @@ export interface UserProfileResponse {
     rejectionReason?: string | null;
   } | null;
 }
+
+export interface LoginChallengeResponse {
+  requiresOtp: boolean;
+  email: string;
+  role: UserRole;
+  message: string;
+}

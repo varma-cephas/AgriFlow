@@ -4,11 +4,9 @@ import { Mail, Lock, Info } from 'lucide-react';
 import { AuthSplitLayout } from '../../components/AuthSplitLayout';
 import { ForgotPasswordModal } from '../../components/ForgotPasswordModal';
 import { authApi } from '../../api/authApi';
-import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setSession } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,28 +17,27 @@ export const LoginPage: React.FC = () => {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
+  e.preventDefault();
+  setError(null);
+  setSubmitting(true);
 
-    try {
-      const auth = await authApi.login({ email, password });
-      setSession(auth, keepSignedIn);
+  try {
+    const challenge = await authApi.login({ email, password });
 
-      if (auth.verificationStatus === 'Unverified' || auth.verificationStatus === 'Pending') {
-        navigate('/pending', { replace: true });
-      } else if (auth.role === 'Buyer') {
-        navigate('/buyer/dashboard', { replace: true });
-      } else {
-        navigate('/farmer/dashboard', { replace: true });
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+    navigate('/verify-otp', {
+      state: {
+        email: challenge.email,
+        role: challenge.role,
+        purpose: 'Login',
+        keepSignedIn,
+      },
+    });
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Invalid email or password.');
+  } finally {
+    setSubmitting(false);
+  }
+};
   return (
     <AuthSplitLayout headline="Farm-to-business supply, traced from seed to sale.">
       <div className="max-w-[440px] mx-auto">
