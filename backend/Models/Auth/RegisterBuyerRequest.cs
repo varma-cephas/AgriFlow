@@ -1,4 +1,6 @@
-﻿namespace backend.Models.Auth
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace backend.Models.Auth
 {
     public class RegisterBuyerRequest
     {
