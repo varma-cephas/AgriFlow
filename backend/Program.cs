@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Services;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -13,7 +14,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Data Protection (for NationalIdEncrypted) & Core Security Services
-builder.Services.AddDataProtection();
+var keysDirectory = new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "App_Data", "keys"));
+builder.Services.AddDataProtection()
+    .SetApplicationName("AgriFlow")
+    .PersistKeysToFileSystem(keysDirectory);
 builder.Services.AddScoped<INationalIdProtector, NationalIdProtector>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IEmailService, ResendEmailService>();
@@ -68,7 +72,7 @@ builder.Services.AddTransient<Resend.IResend, Resend.ResendClient>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
