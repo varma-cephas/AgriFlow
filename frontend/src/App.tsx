@@ -7,6 +7,7 @@ import { VerifyOtpPage } from './pages/auth/VerifyOtpPage';
 import { PendingVerificationPage } from './pages/auth/PendingVerificationPage';
 import { FarmerDashboard } from './pages/farmer/FarmerDashboard';
 import { BuyerDashboard } from './pages/buyer/BuyerDashboard';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
   return (
@@ -45,7 +46,7 @@ export function App() {
             }
           />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
