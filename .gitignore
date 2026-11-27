@@ -10,6 +10,7 @@ backend/bin
 backend/obj
 backend/secrets.json
 backend/appsettings.Development.json
+backend/Properties/PublishProfiles/*
 
 # VS Code
 .vscode/
