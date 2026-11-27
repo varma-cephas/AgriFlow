@@ -11,10 +11,6 @@ namespace backend.Data
         public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
-        public DbSet<Crop> Crops => Set<Crop>();
-        public DbSet<PlantingBatch> PlantingBatches => Set<PlantingBatch>();
-        public DbSet<Listing> Listings => Set<Listing>();
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -50,12 +46,6 @@ namespace backend.Data
             modelBuilder.Entity<OtpCode>(entity =>
             {
                 entity.HasIndex(o => new { o.Email, o.IsUsed, o.ExpiresAtUtc });
-            });
-            modelBuilder.Entity<Listing>(entity =>
-            {
-                entity.HasOne(l => l.Farmer).WithMany().HasForeignKey(l => l.FarmerId).OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(l => l.Crop).WithMany().HasForeignKey(l => l.CropId).OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(l => l.Batch).WithMany().HasForeignKey(l => l.BatchId).OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
