@@ -49,7 +49,7 @@ To prevent database passwords, JWT signing keys, and Resend API keys from ever b
   },
   "Jwt": {
     "Key": "replace-with-a-random-local-dev-secret-at-least-32-chars",
-    "Issuer": "https://localhost:7001",
+    "Issuer": "https://localhost:7179",
     "Audience": "http://localhost:5173"
   }
 }
@@ -65,16 +65,20 @@ Notes
 In Powershell run the command below
 `Update-Database`
 
+Start the API from the repository root with the HTTPS profile:
+
+```powershell
+dotnet run --project backend/backend.csproj --launch-profile https
+```
 
 4. Setting Up & Running the React Frontend
 - Open a terminal inside the frontend/ directory:
 Run:
 ```sh
-cd client
+cd frontend
 npm install
 
 cp .env.example .env
-VITE_API_BASE_URL=https://localhost:7001/api
 
 npm run dev
 ```

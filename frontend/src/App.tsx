@@ -7,6 +7,7 @@ import { VerifyOtpPage } from './pages/auth/VerifyOtpPage';
 import { PendingVerificationPage } from './pages/auth/PendingVerificationPage';
 import { FarmerDashboard } from './pages/farmer/FarmerDashboard';
 import { BuyerDashboard } from './pages/buyer/BuyerDashboard';
+import { AgentWorkspace } from './pages/agent/AgentWorkspace';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
@@ -46,6 +47,11 @@ export function App() {
             }
           />
 
+          <Route path="/agent/*" element={
+            <ProtectedRoute allowedRoles={['Agent']}>
+              <AgentWorkspace />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>

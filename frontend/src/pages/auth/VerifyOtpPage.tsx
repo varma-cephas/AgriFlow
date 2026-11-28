@@ -4,6 +4,7 @@ import { MailCheck, ArrowLeft, RefreshCw } from 'lucide-react';
 import { AuthSplitLayout } from '../../components/AuthSplitLayout';
 import { authApi } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
+import { getDefaultRouteForUser } from '../../components/ProtectedRoute';
 import type { UserRole } from '../../types/auth';
 
 interface VerifyLocationState {
@@ -98,13 +99,7 @@ export const VerifyOtpPage: React.FC = () => {
             const auth = await authApi.verifyOtp({ email, code, purpose });
             setSession(auth, keepSignedIn);
 
-            if (auth.verificationStatus === 'Unverified' || auth.verificationStatus === 'Pending') {
-            navigate('/pending', { replace: true });
-            } else if (auth.role === 'Buyer') {
-            navigate('/buyer/dashboard', { replace: true });
-            } else {
-            navigate('/farmer/dashboard', { replace: true });
-            }
+            navigate(getDefaultRouteForUser(auth.role, auth.verificationStatus), { replace: true });
         } catch (err: any) {
             setError(err.response?.data?.message || 'Invalid or expired verification code.');
         } finally {

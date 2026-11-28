@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { isAxiosError } from 'axios';
 import {
   Sprout,
   Building2,
@@ -46,6 +47,11 @@ export const RegisterPage: React.FC = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error) errorRef.current?.focus();
+  }, [error]);
 
   // Farmer fields
   const [farmerFullName, setFarmerFullName] = useState('');
@@ -168,15 +174,15 @@ export const RegisterPage: React.FC = () => {
         });
       } else {
         const res = await authApi.registerBuyer({
-          fullName: buyerFullName,
-          email: buyerEmail,
-          phone: buyerPhone,
+          fullName: buyerFullName.trim(),
+          email: buyerEmail.trim(),
+          phone: buyerPhone.trim(),
           password: buyerPassword,
           jobTitle: jobTitle || null,
-          businessName,
+          businessName: businessName.trim(),
           businessType,
-          rdbCompanyCode,
-          address: businessAddress,
+          rdbCompanyCode: rdbCompanyCode.trim(),
+          address: businessAddress.trim(),
           city,
         });
 
@@ -185,6 +191,10 @@ export const RegisterPage: React.FC = () => {
         });
       }
     } catch (err: any) {
+      if (isAxiosError(err) && err.code === 'ERR_NETWORK') {
+        setError('Could not reach the AgriFlow API. Make sure the backend is running and try again.');
+        return;
+      }
       const apiMsg =
         err.response?.data?.message ||
         Object.values(err.response?.data?.errors ?? {})
@@ -309,7 +319,7 @@ export const RegisterPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="mt-5 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+          <div ref={errorRef} tabIndex={-1} role="alert" className="mt-5 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -640,6 +650,7 @@ export const RegisterPage: React.FC = () => {
                       type="text"
                       required
                       placeholder="FreshMart Supermarkets"
+                      maxLength={150}
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -670,6 +681,7 @@ export const RegisterPage: React.FC = () => {
                       type="text"
                       required
                       placeholder="108452367"
+                      maxLength={20}
                       value={rdbCompanyCode}
                       onChange={(e) => setRdbCompanyCode(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -706,6 +718,7 @@ export const RegisterPage: React.FC = () => {
                       type="text"
                       required
                       placeholder="Kimironko, Kigali"
+                      maxLength={250}
                       value={businessAddress}
                       onChange={(e) => setBusinessAddress(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -728,6 +741,7 @@ export const RegisterPage: React.FC = () => {
                       type="text"
                       required
                       placeholder="Aline Uwase"
+                      maxLength={150}
                       value={buyerFullName}
                       onChange={(e) => setBuyerFullName(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -740,6 +754,7 @@ export const RegisterPage: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Procurement officer"
+                      maxLength={100}
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -754,6 +769,7 @@ export const RegisterPage: React.FC = () => {
                       type="email"
                       required
                       placeholder="aline.uwase@freshmart.example"
+                      maxLength={256}
                       value={buyerEmail}
                       onChange={(e) => setBuyerEmail(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -767,6 +783,7 @@ export const RegisterPage: React.FC = () => {
                       type="tel"
                       required
                       placeholder="078 555 0142"
+                      maxLength={20}
                       value={buyerPhone}
                       onChange={(e) => setBuyerPhone(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
@@ -786,6 +803,7 @@ export const RegisterPage: React.FC = () => {
                       minLength={8}
                       placeholder="••••••••••"
                       value={buyerPassword}
+                      maxLength={100}
                       onChange={(e) => setBuyerPassword(e.target.value)}
                       className="w-full rounded-lg border border-slate-200 pl-9 pr-10 py-2 text-sm focus:border-agri-700 focus:outline-none focus:ring-1 focus:ring-agri-700"
                     />
