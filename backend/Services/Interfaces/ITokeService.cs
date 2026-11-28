@@ -1,6 +1,9 @@
-﻿namespace backend.Services.Interfaces
+﻿using backend.Data.Entities;
+
+namespace backend.Services.Interfaces
 {
-    public class ITokeService
+    public interface ITokenService
     {
+        string GenerateToken(AppUser user, string verificationStatus);
     }
 }

@@ -10,6 +10,8 @@ backend/bin
 backend/obj
 backend/secrets.json
 backend/appsettings.Development.json
+backend/Properties/PublishProfiles/*
+backend/App_Data/keys
 
 # VS Code
 .vscode/
@@ -41,3 +43,9 @@ Thumbs.db
 # .NET generated files
 bin/
 obj/
+
+# Generated DLL files
+*.dll
+
+# ASP.NET Core Data Protection keys
+backend/App_Data/keys/
