@@ -9,7 +9,8 @@ import type {
   ConfirmFarmVisitPayload,
   RejectFarmVisitPayload,
   RegisterNonDigitalFarmerPayload,
-  RegisterNonDigitalFarmerResponse
+  RegisterNonDigitalFarmerResponse,
+  AgentAuditLogItem
 } from '../types/agent';
 
 export const agentApi = {
@@ -91,6 +92,18 @@ export const agentApi = {
       '/agents/farmers',
       payload
     );
+    return data;
+  },
+
+  getAuditLogs: async (params?: {
+    search?: string;
+    role?: string;
+    action?: string;
+    dateRange?: string;
+  }) => {
+    const { data } = await axiosClient.get<AgentAuditLogItem[]>('/agents/audit-logs', {
+      params,
+    });
     return data;
   },
 };

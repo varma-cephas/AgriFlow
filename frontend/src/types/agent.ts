@@ -178,3 +178,18 @@ export interface RegisterNonDigitalFarmerResponse {
   farmName: string;
   message: string;
 }
+
+
+export interface AgentAuditLogItem {
+  id: number;
+  timeDisplay: string;
+  isoTimestamp: string;
+  actorName: string;
+  actorInitials: string;
+  actorRole: string;
+  onBehalfOfFarmerName?: string | null;
+  actionCategory: string;
+  actionLabel: string;
+  summary: string;
+  result: string;
+}

@@ -135,5 +135,19 @@ namespace backend.Controllers
 
             return Ok(data);
         }
+
+        [HttpGet("audit-logs")]
+        public async Task<IActionResult> GetAuditLogs(
+            [FromQuery] string? search,
+            [FromQuery] string? role,
+            [FromQuery] string? action,
+            [FromQuery] string? dateRange,
+            CancellationToken ct)
+        {
+            var logs = await agentService.GetAgentAuditLogsAsync(
+                GetCurrentUserId(), search, role, action, dateRange, ct);
+
+            return Ok(logs);
+        }
     }
 }

@@ -12,6 +12,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { AgentFarmerSeedStockPage } from './pages/agent/AgentFarmerSeedStockPage';
 import { AgentFarmVisitsPage } from './pages/agent/AgentVisitsFarmPage';
 import { AgentRegisterFarmerPage } from './pages/agent/AgentRegisterFarmerPage';
+import { AgentAuditLogPage } from './pages/agent/AgentAuditLogPage';
 
 export function App() {
   return (
@@ -82,6 +83,15 @@ export function App() {
             element={
               <ProtectedRoute allowedRoles={['Agent']}>
                 <AgentRegisterFarmerPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/agent/audit-log"
+            element={
+              <ProtectedRoute allowedRoles={['Agent']}>
+                <AgentAuditLogPage />
               </ProtectedRoute>
             }
           />

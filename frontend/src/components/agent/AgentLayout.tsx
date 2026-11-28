@@ -10,6 +10,7 @@ import {
   Search,
   Bell,
   LogOut,
+  FileText
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { agentApi } from '../../api/agentApi';
@@ -191,6 +192,20 @@ export const AgentLayout: React.FC<AgentLayoutProps> = ({
                 <Store className="w-4 h-4 shrink-0" />
                 <span>Marketplace</span>
               </button>
+
+              <NavLink
+                to="/agent/audit-log"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition ${
+                    isActive
+                      ? 'bg-white/12 text-white font-semibold'
+                      : 'text-emerald-100/75 hover:bg-white/6 hover:text-white'
+                  }`
+                }
+              >
+                <FileText className="w-4 h-4 shrink-0" />
+                <span>Audit log</span>
+              </NavLink>
             </nav>
           </div>
         </div>

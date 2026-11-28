@@ -43,5 +43,12 @@ namespace backend.Services.Interfaces
             int agentUserId, int visitId, RejectFarmVisitRequest req, CancellationToken ct = default);
         Task<(bool Success, string Message, RegisterNonDigitalFarmerResponse? Data)> RegisterNonDigitalFarmerAsync(
     int agentUserId, RegisterNonDigitalFarmerRequest req, CancellationToken ct = default);
+        Task<List<AgentAuditLogItemDto>> GetAgentAuditLogsAsync(
+            int agentUserId,
+            string? search = null,
+            string? role = null,
+            string? action = null,
+            string? dateRange = null,
+            CancellationToken ct = default);
     }
 }

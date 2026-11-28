@@ -895,5 +895,129 @@ namespace backend.Services
 
             return (true, response.Message, response);
         }
+
+        public async Task<List<AgentAuditLogItemDto>> GetAgentAuditLogsAsync(
+            int agentUserId,
+            string? search = null,
+            string? role = null,
+            string? action = null,
+            string? dateRange = null,
+            CancellationToken ct = default)
+        {
+            var assignedFarmerIds = await db.AgentFarmerAssignments
+                .AsNoTracking()
+                .Where(a => a.AgentId == agentUserId)
+                .Select(a => a.FarmerId)
+                .ToListAsync(ct);
+
+            var query = db.AuditLogs
+                .AsNoTracking()
+                .Where(l => l.ActorUserId == agentUserId
+                         || (l.OnBehalfOfFarmerId != null && assignedFarmerIds.Contains(l.OnBehalfOfFarmerId.Value)));
+
+            // Date filter
+            var nowUtc = DateTime.UtcNow;
+            if (!string.IsNullOrWhiteSpace(dateRange))
+            {
+                query = dateRange.ToLowerInvariant() switch
+                {
+                    "today" => query.Where(l => l.At >= nowUtc.Date),
+                    "7d" => query.Where(l => l.At >= nowUtc.AddDays(-7)),
+                    "30d" => query.Where(l => l.At >= nowUtc.AddDays(-30)),
+                    _ => query
+                };
+            }
+
+            var logs = await query
+                .OrderByDescending(l => l.At)
+                .Take(250)
+                .ToListAsync(ct);
+
+            var userIds = logs
+                .Select(l => l.ActorUserId)
+                .Concat(logs.Where(l => l.OnBehalfOfFarmerId.HasValue).Select(l => l.OnBehalfOfFarmerId!.Value))
+                .Distinct()
+                .ToList();
+
+            var usersMap = await db.Users
+                .AsNoTracking()
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, ct);
+
+            var todayDate = nowUtc.Date;
+
+            var mapped = logs.Select(l =>
+            {
+                usersMap.TryGetValue(l.ActorUserId, out var actor);
+                var actorName = actor?.FullName ?? $"User #{l.ActorUserId}";
+                var actorRole = actor?.Role ?? "Agent";
+
+                string? farmerName = null;
+                if (l.OnBehalfOfFarmerId.HasValue && usersMap.TryGetValue(l.OnBehalfOfFarmerId.Value, out var farmer))
+                {
+                    farmerName = farmer.FullName;
+                }
+
+                var (category, label) = FormatAuditAction(l.Action, l.Entity);
+
+                var timeDisplay = l.At.Date == todayDate
+                    ? l.At.ToString("HH:mm")
+                    : l.At.ToString("dd MMM · HH:mm");
+
+                return new AgentAuditLogItemDto(
+                    Id: l.Id,
+                    TimeDisplay: timeDisplay,
+                    IsoTimestamp: l.At.ToString("O"),
+                    ActorName: actorName,
+                    ActorInitials: GetInitials(actorName),
+                    ActorRole: actorRole,
+                    OnBehalfOfFarmerName: farmerName,
+                    ActionCategory: category,
+                    ActionLabel: label,
+                    Summary: string.IsNullOrWhiteSpace(l.Summary) ? $"{l.Entity} #{l.EntityId}" : l.Summary,
+                    Result: l.Result
+                );
+            });
+
+            // Role filter
+            if (!string.IsNullOrWhiteSpace(role) && !role.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                mapped = mapped.Where(m => m.ActorRole.Equals(role, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Action category filter
+            if (!string.IsNullOrWhiteSpace(action) && !action.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                mapped = mapped.Where(m => m.ActionCategory.Equals(action, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Text search filter
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var q = search.Trim();
+                mapped = mapped.Where(m =>
+                    m.ActorName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    (m.OnBehalfOfFarmerName?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    m.ActionLabel.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    m.Summary.Contains(q, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return mapped.ToList();
+        }
+
+        private static (string Category, string Label) FormatAuditAction(string action, string entity)
+        {
+            return action switch
+            {
+                "CreateSeedStock" => ("SeedStock", "Added seed stock"),
+                "UpdateSeedStock" => ("SeedStock", "Updated seed stock"),
+                "DeleteSeedStock" => ("SeedStock", "Deleted seed stock"),
+                "ConfirmFarmVisit" => ("FarmVisit", "Verified farm visit"),
+                "RejectFarmVisit" => ("FarmVisit", "Rejected farm verification"),
+                "RegisterNonDigitalFarmer" => ("FarmerRegistration", "Registered non-digital farmer"),
+                "RequestAssignment" => ("Assignment", "Requested farmer assignment"),
+                _ => (entity, action)
+            };
+        }
     }
 }
