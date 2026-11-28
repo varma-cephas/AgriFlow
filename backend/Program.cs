@@ -26,6 +26,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMarketplaceService, MarketplaceService>();
 builder.Services.AddScoped<IListingDetailService, ListingDetailService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 // 3. Controllers & OpenAPI/Swagger
 builder.Services.AddControllers();
