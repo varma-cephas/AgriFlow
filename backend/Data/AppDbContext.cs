@@ -15,6 +15,10 @@ namespace backend.Data
         public DbSet<PlantingBatch> PlantingBatches => Set<PlantingBatch>();
         public DbSet<Listing> Listings => Set<Listing>();
 
+        public DbSet<SeedStock> SeedStocks => Set<SeedStock>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -56,6 +60,10 @@ namespace backend.Data
                 entity.HasOne(l => l.Farmer).WithMany().HasForeignKey(l => l.FarmerId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(l => l.Crop).WithMany().HasForeignKey(l => l.CropId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(l => l.Batch).WithMany().HasForeignKey(l => l.BatchId).OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.HasOne(i => i.Listing).WithMany().HasForeignKey(i => i.ListingId).OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
