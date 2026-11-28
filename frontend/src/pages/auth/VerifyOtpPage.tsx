@@ -5,6 +5,7 @@ import { AuthSplitLayout } from '../../components/AuthSplitLayout';
 import { authApi } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
 import type { UserRole } from '../../types/auth';
+import { getDefaultRouteForUser } from '../../components/ProtectedRoute';
 
 interface VerifyLocationState {
   email?: string;
@@ -79,38 +80,33 @@ export const VerifyOtpPage: React.FC = () => {
   };
 
   const handleVerify = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        setInfoMessage(null);
+  e.preventDefault();
+  setError(null);
+  setInfoMessage(null);
 
-        const code = digits.join('');
-        if (!email) {
-            setError('Missing email address. Please return to registration or sign in.');
-            return;
-        }
-        if (code.length !== 6) {
-            setError('Enter all 6 digits from your verification email.');
-            return;
-        }
+  const code = digits.join('');
+  if (!email) {
+    setError('Missing email address. Please return to registration or sign in.');
+    return;
+  }
+  if (code.length !== 6) {
+    setError('Enter all 6 digits from your verification email.');
+    return;
+  }
 
-        setSubmitting(true);
-        try {
-            const auth = await authApi.verifyOtp({ email, code, purpose });
-            setSession(auth, keepSignedIn);
+  setSubmitting(true);
+  try {
+    const auth = await authApi.verifyOtp({ email, code, purpose });
+    setSession(auth, keepSignedIn);
 
-            if (auth.verificationStatus === 'Unverified' || auth.verificationStatus === 'Pending') {
-            navigate('/pending', { replace: true });
-            } else if (auth.role === 'Buyer') {
-            navigate('/buyer/dashboard', { replace: true });
-            } else {
-            navigate('/farmer/dashboard', { replace: true });
-            }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Invalid or expired verification code.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
+    const targetRoute = getDefaultRouteForUser(auth.role, auth.verificationStatus);
+    navigate(targetRoute, { replace: true });
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Invalid or expired verification code.');
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleResend = async () => {
     if (!email || cooldown > 0 || resending) return;
