@@ -43,3 +43,9 @@ Thumbs.db
 # .NET generated files
 bin/
 obj/
+
+# Generated DLL files
+*.dll
+
+# ASP.NET Core Data Protection keys
+backend/App_Data/keys/
