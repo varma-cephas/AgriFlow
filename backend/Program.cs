@@ -24,6 +24,8 @@ builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMarketplaceService, MarketplaceService>();
+builder.Services.AddScoped<IListingDetailService, ListingDetailService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // 3. Controllers & OpenAPI/Swagger
 builder.Services.AddControllers();
