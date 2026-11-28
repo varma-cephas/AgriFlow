@@ -339,3 +339,16 @@ VALUES
     ((SELECT Id FROM orders WHERE OrderNumber = N'AF-3003'), (SELECT Id FROM listing WHERE ListingCode = N'L-201'), 15.00, 18000.00, 'Placed'),
     -- 1 order (20 crates of Carrot Nantes) for Josiane
     ((SELECT Id FROM orders WHERE OrderNumber = N'AF-3004'), (SELECT Id FROM listing WHERE ListingCode = N'L-202'), 20.00, 15000.00, 'Placed');
+
+
+
+    /* assigns a unverfied farm by admin to agent to visit and verify, please change grace email to the  an actual email assigned to her in the db and an actual admin email*/
+    INSERT INTO farm_visit_request (FarmerId, AgentId, RequestedByUserId, VisitBy, Note, Status)
+VALUES (
+    1,
+    (SELECT Id FROM app_user WHERE Email = ''),
+    (SELECT Id FROM app_user WHERE Email = 'admin@agriflow.example'),
+    '2026-11-30',
+    'Verify Land UPI parcel, national ID, and active crops on site for Mown Farms.',
+    'Requested'
+);
