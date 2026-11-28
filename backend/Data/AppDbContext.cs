@@ -10,6 +10,14 @@ namespace backend.Data
         public DbSet<FarmerProfile> FarmerProfiles => Set<FarmerProfile>();
         public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<AgentFarmerAssignment> AgentFarmerAssignments => Set<AgentFarmerAssignment>();
+        public DbSet<FarmVisitRequest> FarmVisitRequests => Set<FarmVisitRequest>();
+        public DbSet<Crop> Crops => Set<Crop>();
+        public DbSet<SeedStock> SeedStocks => Set<SeedStock>();
+        public DbSet<PlantingBatch> PlantingBatches => Set<PlantingBatch>();
+        public DbSet<Listing> Listings => Set<Listing>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +55,31 @@ namespace backend.Data
             {
                 entity.HasIndex(o => new { o.Email, o.IsUsed, o.ExpiresAtUtc });
             });
+
+            modelBuilder.Entity<AgentFarmerAssignment>()
+    .HasIndex(a => a.FarmerId)
+    .IsUnique();
+
+            modelBuilder.Entity<SeedStock>()
+                .HasIndex(s => new { s.FarmerId, s.CropId, s.Variety })
+                .IsUnique();
+
+            modelBuilder.Entity<PlantingBatch>(entity =>
+            {
+                entity.HasIndex(b => b.BatchCode).IsUnique();
+                entity.HasOne(b => b.SeedStock)
+                      .WithMany()
+                      .HasForeignKey(b => b.SeedStockId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Listing>()
+                .HasIndex(l => l.ListingCode)
+                .IsUnique();
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.OrderNumber)
+                .IsUnique();
         }
     }
 }
